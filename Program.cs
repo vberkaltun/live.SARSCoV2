@@ -40,7 +40,7 @@ namespace live.SARSCoV2
                 APP_NAME, APP_VERSION, USER_NAME), JobType.Informational);
 
             Extension.PrintMessage(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
-                USER_NAME, EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING), JobType.Informational);
+                EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING), JobType.Informational);
         }
     }
 }
