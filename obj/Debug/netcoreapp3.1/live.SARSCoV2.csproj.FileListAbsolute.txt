@@ -1,0 +1,16 @@
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\live.SARSCoV2.exe
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\live.SARSCoV2.deps.json
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\live.SARSCoV2.runtimeconfig.json
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\live.SARSCoV2.runtimeconfig.dev.json
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\live.SARSCoV2.dll
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\live.SARSCoV2.pdb
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\FluentScheduler.dll
+C:\Users\Dekimo\source\repos\live.SARSCoV2\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.csproj.CoreCompileInputs.cache
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.AssemblyInfoInputs.cache
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.AssemblyInfo.cs
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.csproj.CopyComplete
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.dll
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.pdb
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.genruntimeconfig.cache
+C:\Users\Dekimo\source\repos\live.SARSCoV2\obj\Debug\netcoreapp3.1\live.SARSCoV2.csprojAssemblyReference.cache

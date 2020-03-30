@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\Dekimo\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\Dekimo\\.nuget\\packages"
+    ]
+  }
+}
