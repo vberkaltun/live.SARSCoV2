@@ -10,16 +10,13 @@ namespace live.SARSCoV2.HttpRequest
         #region Properties
 
         public string ClassName => typeof(T).FullName;
-        public HttpClient Client { get; set; }
+        public HttpClient Client { get; private set; }
 
         #endregion
 
         #region Methods
 
-        public HttpRequest()
-        {
-            Client = new HttpClient();
-        }
+        public HttpRequest() => Client = new HttpClient();
 
         public virtual async Task<T> GetAsync(string path)
         {

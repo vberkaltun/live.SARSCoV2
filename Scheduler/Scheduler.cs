@@ -10,8 +10,8 @@ namespace live.SARSCoV2.Scheduler
 
         public static string ClassName => typeof(T).FullName;
 
-        public static string Path { get; set; }
-        public static int Interval { get; set; }
+        public static string Path { get; private set; }
+        public static int Interval { get; private set; }
 
         #endregion
 
@@ -33,10 +33,7 @@ namespace live.SARSCoV2.Scheduler
 
         public class Task : IJob
         {
-            public virtual async void Execute()
-            {
-                await new HttpRequest<T>().GetAsync(Path);
-            }
+            public virtual async void Execute() => await new HttpRequest<T>().GetAsync(Path);
         }
 
         #endregion

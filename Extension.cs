@@ -20,7 +20,7 @@ namespace live.SARSCoV2
             lock (Chain)
             {
                 // print date and time
-                PrintMessage(string.Format("{0}<{1}>: ", DateTime.Now.ToString("yyyy/MM/dd-h:mm:ss"), USER_NAME), false);
+                PrintMessage(string.Format("{0}<{1}>: ", DateTime.Now.ToString("yyyy/MM/dd-h:mm:ss"), DOMAIN_USERNAME), false);
 
                 switch (type)
                 {
