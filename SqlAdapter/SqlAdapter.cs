@@ -2,11 +2,13 @@
 using System.Threading.Tasks;
 using static live.SARSCoV2.Global;
 
-namespace live.SARSCoV2.Database
+namespace live.SARSCoV2.SqlAdapter
 {
     class SqlAdapter : ISqlAdapter
     {
         #region Properties
+
+        public string ClassName => GetType().FullName;
 
         public string Server { get; private set; }
         public string Username { get; private set; }

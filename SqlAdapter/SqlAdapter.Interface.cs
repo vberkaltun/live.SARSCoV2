@@ -1,10 +1,12 @@
 ﻿using MySql.Data.MySqlClient;
 using System.Threading.Tasks;
 
-namespace live.SARSCoV2.Database
+namespace live.SARSCoV2.SqlAdapter
 {
     interface ISqlAdapter
     {
+        string ClassName { get; }
+
         string Server { get; }
         string Username { get; }
         string Password { get; }

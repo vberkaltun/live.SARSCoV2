@@ -79,5 +79,18 @@ namespace live.SARSCoV2
         public static bool GetVisibleMessage() => IsVisibleMessage;
 
         #endregion
+
+        #region Methods
+
+        public static void PrintAppInfo()
+        {
+            PrintMessage(string.Format("{0} {1}",
+                APP_NAME, APP_VERSION, DOMAIN_USERNAME), JobType.Informational);
+
+            PrintMessage(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
+                EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING), JobType.Informational);
+        }
+
+        #endregion
     }
 }
