@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using FluentScheduler;
 using live.SARSCoV2.Dataset;
-using live.SARSCoV2.HttpRequest;
 using live.SARSCoV2.Scheduler;
+using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2
 {
@@ -11,7 +12,11 @@ namespace live.SARSCoV2
     {
         static void Main()
         {
+            // show message
             Extension.SetVisibleMessage();
+
+            // show main app informations
+            printAppInfo();
 
             // start the scheduler
             JobManager.Initialize(new InheritScheduler<General>(@"https://corona.lmao.ninja/all"));
@@ -28,6 +33,16 @@ namespace live.SARSCoV2
                 JobManager.StopAndBlock();
                 break;
             }
+        }
+
+        static void printAppInfo()
+        {
+            Extension.PrintMessage(string.Format("{0} {1}",
+                Assembly.GetExecutingAssembly().GetName().Name,
+                Assembly.GetExecutingAssembly().GetName().Version), JobType.Informational);
+            
+            Extension.PrintMessage(string.Format("Exit code: {0}, Interval: {1}",
+                EXIT_CODE, SCHEDULED_JOB_INTERVAL), JobType.Informational);
         }
     }
 }

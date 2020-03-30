@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http;
 using System.Threading.Tasks;
+using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.HttpRequest
 {
