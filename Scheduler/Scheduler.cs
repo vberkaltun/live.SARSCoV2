@@ -10,8 +10,8 @@ namespace live.SARSCoV2.Scheduler
 
         public static string ClassName => typeof(T).FullName;
 
-        public static string Path { get; private set; }
-        public static int Interval { get; private set; }
+        public static string Path { get; protected set; }
+        public static int Interval { get; protected set; }
 
         #endregion
 
