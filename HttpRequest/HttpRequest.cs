@@ -24,7 +24,7 @@ namespace live.SARSCoV2.HttpRequest
         public virtual async Task<T> GetAsync(string path)
         {
             // read data
-            var response = await Client.GetAsync(@path);
+            var response = await Client.GetAsync(path);
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
 
