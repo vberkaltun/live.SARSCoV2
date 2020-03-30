@@ -1,5 +1,6 @@
 ﻿using FluentScheduler;
 using live.SARSCoV2.HttpRequest;
+using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Scheduler
 {
@@ -17,7 +18,7 @@ namespace live.SARSCoV2.Scheduler
         #region Methods
 
         public Scheduler() { }
-        public Scheduler(string path, int interval = Global.SCHEDULED_JOB_INTERVAL)
+        public Scheduler(string path, int interval = SCHEDULED_JOB_INTERVAL)
         {
             Path = path;
             Interval = interval;

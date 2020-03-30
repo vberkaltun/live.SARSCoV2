@@ -29,7 +29,7 @@ namespace live.SARSCoV2.HttpRequest
             var responseBody = await response.Content.ReadAsStringAsync();
 
             // parse and return, do not 
-            return JsonConvert.DeserializeObject<T>(responseBody, new JsonSerializerSettings { NullValueHandling = Global.NULL_VALUE_HANDLING });
+            return JsonConvert.DeserializeObject<T>(responseBody, new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING });
         }
 
         #endregion

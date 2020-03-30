@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using FluentScheduler;
 using live.SARSCoV2.Dataset;
 using live.SARSCoV2.Scheduler;
@@ -26,7 +25,7 @@ namespace live.SARSCoV2
 
             while (true)
             {
-                if (Extension.ReadChar() != Global.EXIT_CODE)
+                if (Extension.ReadChar() != EXIT_CODE)
                     continue;
 
                 // stop the scheduler
@@ -38,9 +37,8 @@ namespace live.SARSCoV2
         static void printAppInfo()
         {
             Extension.PrintMessage(string.Format("{0} {1}",
-                Assembly.GetExecutingAssembly().GetName().Name,
-                Assembly.GetExecutingAssembly().GetName().Version), JobType.Informational);
-            
+                APP_NAME, APP_VERSION), JobType.Informational);
+
             Extension.PrintMessage(string.Format("Exit code: {0}, Interval: {1}",
                 EXIT_CODE, SCHEDULED_JOB_INTERVAL), JobType.Informational);
         }

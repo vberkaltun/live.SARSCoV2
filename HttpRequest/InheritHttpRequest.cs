@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.HttpRequest
 {
@@ -7,7 +8,7 @@ namespace live.SARSCoV2.HttpRequest
         public override async Task<T> GetAsync(string path)
         {
             // print message
-            Extension.PrintMessage(ClassName, Global.JobType.HTTPRequest);
+            Extension.PrintMessage(ClassName, JobType.HTTPRequest);
 
             // call base
             return await base.GetAsync(path);
