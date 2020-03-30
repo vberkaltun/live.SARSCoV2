@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using FluentScheduler;
-using live.SARSCoV2.Dataset;
+using live.SARSCoV2.Dataset.Http;
 using live.SARSCoV2.Scheduler;
 using static live.SARSCoV2.Global;
 

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace live.SARSCoV2.Dataset
+namespace live.SARSCoV2.Dataset.Http
 {
     struct General
     {
