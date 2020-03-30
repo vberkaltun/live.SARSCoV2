@@ -36,6 +36,9 @@ namespace live.SARSCoV2.Dataset
 
         [JsonProperty(PropertyName = "deathsPerOneMillion")]
         public readonly long DeathsPerOneMillion;
+        
+        [JsonProperty(PropertyName = "updated")]
+        public readonly long Updated;
     }
 
     struct CountryInfo
