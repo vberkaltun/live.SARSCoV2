@@ -2,7 +2,7 @@
 {
     struct General
     {
-        public readonly StatisticsV2 Statistics;
+        public readonly Statistics Statistics;
 
         public readonly long Updated;
     }

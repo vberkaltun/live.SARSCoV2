@@ -40,31 +40,10 @@ namespace live.SARSCoV2
                 .ForMember(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Recovered));
             });
 
-
-            // initialize the mapper
-            public readonly MapperConfiguration CountryV1 = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Http.CountryV1, Dataset.Sql.CountryV1>()
-                .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
-
-                .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.DomainInfo.Domain))
-                .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => src.DomainInfo.ISO2))
-                .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => src.DomainInfo.ISO3))
-
-                .ForMember(tar => tar.DomainInfo.Latitude, src => src.MapFrom(src => src.DomainInfo.Latitude))
-                .ForMember(tar => tar.DomainInfo.Longitude, src => src.MapFrom(src => src.DomainInfo.Longitude))
-
-                .ForMember(tar => tar.PerOneMillion.Cases, src => src.MapFrom(src => src.CasesPerOneMillion))
-                .ForMember(tar => tar.PerOneMillion.Deaths, src => src.MapFrom(src => src.DeathsPerOneMillion))
-
-                .ForMember(tar => tar.Today.Cases, src => src.MapFrom(src => src.TodayCases))
-                .ForMember(tar => tar.Today.Deaths, src => src.MapFrom(src => src.TodayDeaths));
-            });
-
             // initialize the mapper
             public readonly MapperConfiguration CountryV2 = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Dataset.Http.CountryV2, Dataset.Sql.CountryV2>()
+                cfg.CreateMap<Dataset.Http.Country, Dataset.Sql.Country>()
                 .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
 
                 .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
