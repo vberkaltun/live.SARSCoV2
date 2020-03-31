@@ -5,18 +5,18 @@ namespace live.SARSCoV2.Dataset.Http
     struct General
     {
         [JsonProperty(PropertyName = "cases")]
-        public readonly long Cases;
-        
+        public long Cases { get; }
+
         [JsonProperty(PropertyName = "deaths")]
-        public readonly long Deaths;
-        
+        public long Deaths { get; }
+
         [JsonProperty(PropertyName = "recovered")]
-        public readonly long Recovered;
-        
+        public long Recovered { get; }
+
         [JsonProperty(PropertyName = "updated")]
-        public readonly long Updated;
-        
+        public long Updated { get; }
+
         [JsonProperty(PropertyName = "active")]
-        public readonly long Active;
+        public long Active { get; }
     }
 }

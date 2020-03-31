@@ -5,18 +5,18 @@ namespace live.SARSCoV2.Dataset.Http
     struct Country
     {
         [JsonProperty(PropertyName = "country")]
-        public readonly string Domain;
+        public string Domain { get; }
 
         [JsonProperty(PropertyName = "province")]
-        public readonly string Province;
+        public string Province { get; }
 
         [JsonProperty(PropertyName = "updatedAt")]
-        public readonly string Updated;
+        public string Updated { get; }
 
         [JsonProperty(PropertyName = "stats")]
-        public readonly Statistics Statistics;
+        public Statistics Statistics { get; }
 
         [JsonProperty(PropertyName = "coordinates")]
-        public readonly Coordinates Coordinates;
+        public Coordinates Coordinates { get; }
     }
 }

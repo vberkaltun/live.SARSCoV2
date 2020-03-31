@@ -6,12 +6,12 @@ namespace live.SARSCoV2.Dataset.Http
     class Timeline
     {
         [JsonProperty(PropertyName = "cases")]
-        public readonly Dictionary<string, long> Cases;
+        public Dictionary<string, long> Cases { get; }
 
         [JsonProperty(PropertyName = "deaths")]
-        public readonly Dictionary<string, long> Deaths;
+        public Dictionary<string, long> Deaths { get; }
 
         [JsonProperty(PropertyName = "recovered")]
-        public readonly Dictionary<string, long> Recovered;
+        public Dictionary<string, long> Recovered { get; }
     }
 }

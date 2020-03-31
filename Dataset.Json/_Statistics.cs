@@ -2,8 +2,8 @@
 {
     class Statistics
     {
-        public readonly long Cases;
-        public readonly long Deaths;
-        public readonly long Recovered;
+        public long Cases { get; }
+        public long Deaths { get; }
+        public long Recovered { get; }
     }
 }

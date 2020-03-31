@@ -4,8 +4,8 @@ namespace live.SARSCoV2.Dataset.Json
 {
     class Timeline
     {
-        public readonly Dictionary<string, long> Cases;
-        public readonly Dictionary<string, long> Deaths;
-        public readonly Dictionary<string, long> Recovered;
+        public Dictionary<string, long> Cases { get; }
+        public Dictionary<string, long> Deaths { get; }
+        public Dictionary<string, long> Recovered { get; }
     }
 }

@@ -5,9 +5,9 @@ namespace live.SARSCoV2.Dataset.Http
     class Coordinates
     {
         [JsonProperty(PropertyName = "latitude")]
-        public readonly double Latitude;
+        public double Latitude { get; }
 
         [JsonProperty(PropertyName = "longitude")]
-        public readonly double Longitude;
+        public double Longitude { get; }
     }
 }

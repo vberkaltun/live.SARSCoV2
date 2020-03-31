@@ -5,12 +5,12 @@ namespace live.SARSCoV2.Dataset.Http
     class Statistics
     {
         [JsonProperty(PropertyName = "confirmed")]
-        public readonly long Cases;
+        public long Cases { get; }
 
         [JsonProperty(PropertyName = "deaths")]
-        public readonly long Deaths;
+        public long Deaths { get; }
 
         [JsonProperty(PropertyName = "recovered")]
-        public readonly long Recovered;
+        public long Recovered { get; }
     }
 }

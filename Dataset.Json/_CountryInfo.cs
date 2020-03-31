@@ -2,11 +2,11 @@
 {
     class CountryInfo
     {
-        public readonly string Domain;
-        public readonly string Province;
-        public readonly string ISO2;
-        public readonly string ISO3;
-        public readonly double Latitude;
-        public readonly double Longitude;
+        public string Domain { get; }
+        public string Province { get; }
+        public string ISO2 { get; }
+        public string ISO3 { get; }
+        public double Latitude { get; }
+        public double Longitude { get; }
     }
 }

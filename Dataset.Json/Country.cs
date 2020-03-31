@@ -2,9 +2,9 @@
 {
     struct Country
     {
-        public readonly CountryInfo DomainInfo;
-        public readonly Statistics Statistics;
+        public CountryInfo DomainInfo { get; }
+        public Statistics Statistics { get; }
 
-        public readonly long Updated;
+        public long Updated { get; }
     }
 }

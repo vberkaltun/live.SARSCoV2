@@ -5,24 +5,24 @@ namespace live.SARSCoV2.Dataset.Http
     class CountryInfo
     {
         [JsonProperty(PropertyName = "_id")]
-        public readonly long ID;
+        public long ID { get; }
 
         [JsonProperty(PropertyName = "country")]
-        public readonly string Domain;
+        public string Domain { get; }
 
         [JsonProperty(PropertyName = "iso2")]
-        public readonly string ISO2;
+        public string ISO2 { get; }
 
         [JsonProperty(PropertyName = "iso3")]
-        public readonly string ISO3;
+        public string ISO3 { get; }
 
         [JsonProperty(PropertyName = "lat")]
-        public readonly double Latitude;
+        public double Latitude { get; }
 
         [JsonProperty(PropertyName = "long")]
-        public readonly double Longitude;
+        public double Longitude { get; }
 
         [JsonProperty(PropertyName = "flag")]
-        public readonly string Flag;
+        public string Flag { get; }
     }
 }

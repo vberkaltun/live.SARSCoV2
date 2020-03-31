@@ -2,8 +2,8 @@
 {
     struct General
     {
-        public readonly Statistics Statistics;
+        public Statistics Statistics { get; }
 
-        public readonly long Updated;
+        public long Updated { get; }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using FluentScheduler;
 using live.SARSCoV2.Dataset.Http;
 using live.SARSCoV2.Module.Base;
 using live.SARSCoV2.Module.HttpRequest;
 using live.SARSCoV2.Module.Scheduler;
+using live.SARSCoV2.Module.SqlAdapter;
+using live.SARSCoV2.Module.SqlQuery;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2
@@ -16,14 +19,28 @@ namespace live.SARSCoV2
 
     class SARSCoV2 : Logger
     {
+        HttpClient Client = new HttpClient();
+        SqlAdapter Sql = new SqlAdapter();
+
+        HttpRequest<General> General;
+        HttpRequest<List<Country>> Country;
+        HttpRequest<List<Historical>> Historical;
+
         public SARSCoV2()
         {
-            // set message visible
+            // init variable
+            Client = new HttpClient();
+            Sql = new SqlAdapter();
+
+            General = new HttpRequest<General>(Client, @"https://corona.lmao.ninja/all");
+            Country = new HttpRequest<List<Country>>(Client, @"https://corona.lmao.ninja/v2/jhucsse");
+            Historical = new HttpRequest<List<Historical>>(Client, @"https://corona.lmao.ninja/v2/historical");
+
+            // init console
             SetVisibleMessage();
-            // show main app informations
             PrintAppInfo();
 
-            // start the scheduler
+            // init scheduler
             JobManager.Initialize(new Scheduler(TaskGeneralAsync));
             JobManager.Initialize(new Scheduler(TaskCountry));
             JobManager.Initialize(new Scheduler(TaskHistorical));
@@ -43,17 +60,20 @@ namespace live.SARSCoV2
 
         public async void TaskGeneralAsync()
         {
-            await new HttpRequest<General>().GetAsync(@"https://corona.lmao.ninja/all");
+            General general = await General.GetAsync();
+
+            await Sql.ConnectAsync();
+            Sql.Insert(new Query<General>(general), "general");
         }
 
         public async void TaskCountry()
         {
-            await new HttpRequest<List<Country>>().GetAsync(@"https://corona.lmao.ninja/v2/jhucsse");
+            await Country.GetAsync();
         }
 
         public async void TaskHistorical()
         {
-            await new HttpRequest<List<Historical>>().GetAsync(@"https://corona.lmao.ninja/v2/historical");
+            await Historical.GetAsync();
         }
 
         public void PrintAppInfo()

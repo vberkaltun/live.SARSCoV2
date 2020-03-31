@@ -2,7 +2,7 @@
 {
     struct Historical
     {
-        public readonly CountryInfo DomainInfo;
-        public readonly Timeline Timeline;
+        public CountryInfo DomainInfo { get; }
+        public Timeline Timeline { get; }
     }
 }

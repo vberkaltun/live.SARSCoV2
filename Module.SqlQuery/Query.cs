@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 
 namespace live.SARSCoV2.Module.SqlQuery
 {
@@ -8,16 +9,30 @@ namespace live.SARSCoV2.Module.SqlQuery
 
         public static string ClassName => typeof(T).FullName;
 
-        public T File { get; private set; }
+        private T File { get; set; }
+
+        private Dictionary<string, object> Properties { get; set; }
 
         #endregion
 
         #region Methods
 
-        public Query(T file) => File = file;
+        public Query(T file)
+        {
+            File = file;
+            Properties = new Dictionary<string, object>();
+        }
 
-        public object GetValue(string propertyName) => File.GetType().GetProperty(propertyName).GetValue(File, null);
-        public PropertyInfo[] GetProperties() => typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        public Dictionary<string, object> GetProperties()
+        {
+            var source = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var item in source)
+                Properties.Add(item.Name, File.GetType().GetProperty(item.Name).GetValue(File, null));
+
+            return Properties;
+        }
+        public T GetFile() => File;
 
         #endregion
     }

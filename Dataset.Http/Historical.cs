@@ -5,12 +5,12 @@ namespace live.SARSCoV2.Dataset.Http
     struct Historical
     {
         [JsonProperty(PropertyName = "country")]
-        public readonly string Domain;
+        public string Domain { get; }
 
         [JsonProperty(PropertyName = "province")]
-        public readonly string Province;
+        public string Province { get; }
 
         [JsonProperty(PropertyName = "timeline")]
-        public readonly Timeline Timeline;
+        public Timeline Timeline { get; }
     }
 }
