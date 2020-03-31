@@ -6,7 +6,8 @@ namespace live.SARSCoV2.Module.HttpRequest
     interface IHttpRequest<T>
     {
         HttpClient Client { get; }
+        string Path { get; }
 
-        Task<T> GetAsync(string path);
+        Task<T> GetAsync();
     }
 }

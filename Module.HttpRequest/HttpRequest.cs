@@ -11,27 +11,30 @@ namespace live.SARSCoV2.Module.HttpRequest
         #region Properties
 
         public static string ClassName => typeof(T).FullName;
+
         public HttpClient Client { get; private set; }
+        public string Path { get; private set; }
 
         #endregion
 
         #region Methods
 
-        public HttpRequest()
+        public HttpRequest(HttpClient client = null, string path = null)
         {
             // print message
             PrintMessage(ClassName, JobType.Initialize);
 
-            Client = new HttpClient();
+            Client = client;
+            Path = path;
         }
 
-        public async Task<T> GetAsync(string path)
+        public async Task<T> GetAsync()
         {
             // print message
             PrintMessage(ClassName, JobType.Read);
 
             // read data
-            var response = await Client.GetAsync(path);
+            var response = await Client.GetAsync(Path);
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
 
