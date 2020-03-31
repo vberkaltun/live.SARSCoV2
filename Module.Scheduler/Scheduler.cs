@@ -1,39 +1,38 @@
-﻿using FluentScheduler;
+﻿using live.SARSCoV2.Module.Base;
 using live.SARSCoV2.Module.HttpRequest;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.Scheduler
 {
-    partial class Scheduler<T> : Registry, IScheduler
+    class Scheduler<T> : Logger, IScheduler
     {
         #region Properties
 
-        public static string ClassName => typeof(T).FullName;
+        public string ClassName => typeof(T).FullName;
 
-        public static string Path { get; protected set; }
-        public static int Interval { get; protected set; }
+        public string Path { get; private set; }
+        public int Interval { get; private set; }
 
         #endregion
 
         #region Methods
 
-        public Scheduler() { }
         public Scheduler(string path, int interval = SCHEDULED_JOB_INTERVAL)
         {
+            // print message
+            PrintMessage(ClassName, JobType.Initialize);
+
             Path = path;
             Interval = interval;
-
-            // schedular
-            Schedule<Task>().NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
         }
 
-        #endregion
-
-        #region Subclasses
-
-        public class Task : IJob
+        public virtual void ScheduleAsync()
         {
-            public virtual async void Execute() => await new HttpRequest<T>().GetAsync(Path);
+            // print message
+            PrintMessage(ClassName, JobType.Read);
+
+            // schedular
+            Schedule(async () => await new HttpRequest<T>().GetAsync(Path)).NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
         }
 
         #endregion

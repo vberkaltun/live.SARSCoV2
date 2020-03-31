@@ -1,11 +1,12 @@
-﻿using Newtonsoft.Json;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using live.SARSCoV2.Module.Base;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.HttpRequest
 {
-    partial class HttpRequest<T> : IHttpRequest<T>
+    class HttpRequest<T> : Logger, IHttpRequest<T>
     {
         #region Properties
 
@@ -16,10 +17,19 @@ namespace live.SARSCoV2.Module.HttpRequest
 
         #region Methods
 
-        public HttpRequest() => Client = new HttpClient();
+        public HttpRequest()
+        {
+            // print message
+            PrintMessage(ClassName, JobType.Initialize);
+
+            Client = new HttpClient();
+        }
 
         public virtual async Task<T> GetAsync(string path)
         {
+            // print message
+            PrintMessage(ClassName, JobType.Read);
+
             // read data
             var response = await Client.GetAsync(path);
             response.EnsureSuccessStatusCode();

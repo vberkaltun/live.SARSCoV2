@@ -1,8 +1,8 @@
-﻿namespace live.SARSCoV2.Dataset.Sql
+﻿namespace live.SARSCoV2.Dataset.Json
 {
     struct Historical
     {
         public readonly CountryInfo DomainInfo;
-        public readonly Statistics Statistics;
+        public readonly Timeline Timeline;
     }
 }

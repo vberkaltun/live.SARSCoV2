@@ -1,4 +1,4 @@
-﻿namespace live.SARSCoV2.Dataset.Sql
+﻿namespace live.SARSCoV2.Dataset.Json
 {
     class CountryInfo
     {

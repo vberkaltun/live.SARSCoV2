@@ -1,10 +1,11 @@
-﻿using MySql.Data.MySqlClient;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using MySql.Data.MySqlClient;
+using live.SARSCoV2.Module.Base;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {
-    class SqlAdapter : ISqlAdapter
+    class SqlAdapter : Logger, ISqlAdapter
     {
         #region Properties
 
@@ -25,6 +26,9 @@ namespace live.SARSCoV2.Module.SqlAdapter
         public SqlAdapter(string server = SQL_SERVER, string username = SQL_USERNAME,
             string password = SQL_PASSWORD, string database = SQL_DATABASE)
         {
+            // print message
+            PrintMessage(ClassName, JobType.Initialize);
+
             Server = server;
             Username = username;
             Password = password;
@@ -33,6 +37,9 @@ namespace live.SARSCoV2.Module.SqlAdapter
 
         public virtual async Task ConnectAsync()
         {
+            // print message
+            PrintMessage(ClassName, JobType.Succesfull);
+
             Connection = new MySqlConnection(GetConnectionString());
 
             await Connection.OpenAsync();
@@ -40,6 +47,9 @@ namespace live.SARSCoV2.Module.SqlAdapter
         }
         public virtual async Task DisconnectAsync()
         {
+            // print message
+            PrintMessage(ClassName, JobType.Error);
+
             await Connection.CloseAsync();
             IsConnected = false;
         }

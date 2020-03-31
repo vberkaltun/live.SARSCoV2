@@ -1,10 +1,9 @@
-﻿namespace live.SARSCoV2.Module.Scheduler
+﻿using System.Threading.Tasks;
+
+namespace live.SARSCoV2.Module.Scheduler
 {
     interface IScheduler
     {
-        static string ClassName { get; }
-
-        static string Path { get; }
-        static string Interval { get; }
+        void ScheduleAsync();
     }
 }
