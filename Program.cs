@@ -10,7 +10,7 @@ namespace live.SARSCoV2
 {
     class Program
     {
-         static async System.Threading.Tasks.Task Main()
+        static void Main()
         {
             // set message visible
             Extension.SetVisibleMessage();
@@ -21,9 +21,6 @@ namespace live.SARSCoV2
             JobManager.Initialize(new InheritScheduler<General>(@"https://corona.lmao.ninja/all"));
             JobManager.Initialize(new InheritScheduler<List<Country>>(@"https://corona.lmao.ninja/countries"));
             JobManager.Initialize(new InheritScheduler<List<Historical>>(@"https://corona.lmao.ninja/v2/jhucsse"));
-
-            InheritSqlAdapter adapter = new InheritSqlAdapter();
-            await adapter.ConnectAsync();
 
             while (true)
             {
