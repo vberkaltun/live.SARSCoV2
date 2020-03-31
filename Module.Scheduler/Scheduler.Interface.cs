@@ -1,9 +1,14 @@
-﻿using System.Threading.Tasks;
+﻿using System;
 
 namespace live.SARSCoV2.Module.Scheduler
 {
     interface IScheduler
     {
-        void ScheduleAsync();
+        Guid ID { get; }
+        int Interval { get; }
+        bool Autostart { get; }
+
+        void Schedule();
+        void Terminate();
     }
 }

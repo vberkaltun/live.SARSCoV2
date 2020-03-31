@@ -1,9 +1,9 @@
-﻿using AutoMapper;
-using ISO3166;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
+using ISO3166;
+using AutoMapper;
+using Newtonsoft.Json;
 
 namespace live.SARSCoV2
 {
@@ -66,7 +66,7 @@ namespace live.SARSCoV2
                 .ForMember(tar => tar.Timeline.Recovered, src => src.MapFrom(src => src.Timeline.Recovered));
             });
 
-            public static Country GetCountryInfo(string country)
+            private static Country GetCountryInfo(string country)
             {
                 var result1 = Country.List.FirstOrDefault(src => src.Name == country);
                 var result2 = Country.List.FirstOrDefault(src => src.TwoLetterCode == country);

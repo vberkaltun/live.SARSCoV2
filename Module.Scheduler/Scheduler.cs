@@ -1,38 +1,58 @@
-﻿using live.SARSCoV2.Module.Base;
-using live.SARSCoV2.Module.HttpRequest;
+﻿using System;
+using FluentScheduler;
+using live.SARSCoV2.Module.Base;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.Scheduler
 {
-    class Scheduler<T> : Logger, IScheduler
+    class Scheduler : Logger, IScheduler
     {
         #region Properties
 
-        public static string ClassName => typeof(T).FullName;
+        public static string ClassName => typeof(Scheduler).FullName;
 
-        public string Path { get; private set; }
+        public Guid ID { get; private set; } = Guid.NewGuid();
         public int Interval { get; private set; }
+        public bool Autostart { get; private set; }
+
+        #endregion
+
+        #region Delegate
+
+        private event Action Executed;
 
         #endregion
 
         #region Methods
 
-        public Scheduler(string path, int interval = SCHEDULED_JOB_INTERVAL)
+        public Scheduler(Action executed = null, int interval = SCHEDULED_JOB_INTERVAL, bool autostart = true)
         {
             // print message
             PrintMessage(ClassName, JobType.Initialize);
 
-            Path = path;
             Interval = interval;
+            Executed = executed;
+            Autostart = autostart;
+
+            // run auto
+            if (Autostart) Schedule();
         }
 
-        public virtual void ScheduleAsync()
+        public void Schedule()
         {
             // print message
             PrintMessage(ClassName, JobType.Read);
 
             // schedular
-            Schedule(async () => await new HttpRequest<T>().GetAsync(Path)).NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
+            Schedule(() => Executed?.Invoke()).WithName(ID.ToString()).NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
+        }
+        public void Terminate()
+        {
+            // print message
+            PrintMessage(ClassName, JobType.Error);
+
+            // remove task
+            JobManager.RemoveJob(ID.ToString());
         }
 
         #endregion

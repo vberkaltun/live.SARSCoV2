@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using live.SARSCoV2.Module.Base;
+using live.SARSCoV2.Module.SqlQuery;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.SqlAdapter
@@ -8,6 +10,8 @@ namespace live.SARSCoV2.Module.SqlAdapter
     class SqlAdapter : Logger, ISqlAdapter
     {
         #region Properties
+        
+        public static string InsertTemplate => @"INSERT INTO {0}({1}) VALUES({2})";
 
         public static string ClassName => typeof(SqlAdapter).FullName;
 
@@ -35,7 +39,7 @@ namespace live.SARSCoV2.Module.SqlAdapter
             Database = database;
         }
 
-        public virtual async Task ConnectAsync()
+        public async Task ConnectAsync()
         {
             // print message
             PrintMessage(ClassName, JobType.Succesfull);
@@ -45,13 +49,31 @@ namespace live.SARSCoV2.Module.SqlAdapter
             await Connection.OpenAsync();
             IsConnected = true;
         }
-        public virtual async Task DisconnectAsync()
+        public async Task DisconnectAsync()
         {
             // print message
             PrintMessage(ClassName, JobType.Error);
 
             await Connection.CloseAsync();
             IsConnected = false;
+        }
+
+        public void Insert(Query<object> file, string tableName)
+        {
+            List<string> names = null;
+            foreach (var item in file.GetProperties())
+                names.Add(item.Name.Trim());
+
+            string target = string.Join(", ", names.ToArray()).Trim();
+            string source = "@" + string.Join(", @", names.ToArray()).Trim();
+
+            MySqlCommand command = new MySqlCommand(string.Format(InsertTemplate, tableName, target, source), Connection);
+            command.Prepare();
+
+            foreach (var item in file.GetProperties())
+                command.Parameters.AddWithValue(string.Format("@{0}", item.Name), item.GetValue(file).ToString());
+
+            command.ExecuteNonQuery();
         }
 
         public string GetConnectionString() => string.Format(@"server={0}; uid={1}; pwd={2}; database={3}", Server, Username, Password, Database);

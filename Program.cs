@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using FluentScheduler;
 using live.SARSCoV2.Dataset.Http;
-using live.SARSCoV2.Module.Scheduler;
 using live.SARSCoV2.Module.Base;
+using live.SARSCoV2.Module.HttpRequest;
+using live.SARSCoV2.Module.Scheduler;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2
 {
     class Program : Logger
     {
-        static void Main()
-        {
-            new SARSCoV2();
-        }
+        static void Main() => new SARSCoV2();
     }
 
     class SARSCoV2 : Logger
@@ -26,17 +23,10 @@ namespace live.SARSCoV2
             // show main app informations
             PrintAppInfo();
 
-            Dataset.Sql.ICountry aaa = new Dataset.Sql.ICountry();
-            aaa.ID = 15;
-
-            PropertyInfo[] propInfos = typeof(Dataset.Sql.ICountry).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            var xxx = GetPropValue(aaa, propInfos[0].Name);
-
             // start the scheduler
-            JobManager.Initialize(new Scheduler<General>(@"https://corona.lmao.ninja/all"));
-            JobManager.Initialize(new Scheduler<List<Country>>(@"https://corona.lmao.ninja/v2/jhucsse"));
-            JobManager.Initialize(new Scheduler<List<Historical>>(@"https://corona.lmao.ninja/v2/historical"));
+            JobManager.Initialize(new Scheduler(TaskGeneralAsync));
+            JobManager.Initialize(new Scheduler(TaskCountry));
+            JobManager.Initialize(new Scheduler(TaskHistorical));
 
             while (true)
             {
@@ -49,12 +39,22 @@ namespace live.SARSCoV2
             }
         }
 
-        public static object GetPropValue(object src, string propName)
+        #region Methods
+
+        public async void TaskGeneralAsync()
         {
-            return src.GetType().GetProperty(propName).GetValue(src, null);
+            await new HttpRequest<General>().GetAsync(@"https://corona.lmao.ninja/all");
         }
 
-        #region Methods
+        public async void TaskCountry()
+        {
+            await new HttpRequest<List<Country>>().GetAsync(@"https://corona.lmao.ninja/v2/jhucsse");
+        }
+
+        public async void TaskHistorical()
+        {
+            await new HttpRequest<List<Historical>>().GetAsync(@"https://corona.lmao.ninja/v2/historical");
+        }
 
         public void PrintAppInfo()
         {
@@ -64,7 +64,6 @@ namespace live.SARSCoV2
             PrintMessage(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
                 EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING), JobType.Informational);
         }
-
 
         #endregion
     }

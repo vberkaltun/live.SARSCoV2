@@ -25,7 +25,7 @@ namespace live.SARSCoV2.Module.HttpRequest
             Client = new HttpClient();
         }
 
-        public virtual async Task<T> GetAsync(string path)
+        public async Task<T> GetAsync(string path)
         {
             // print message
             PrintMessage(ClassName, JobType.Read);

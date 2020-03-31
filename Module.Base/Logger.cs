@@ -7,9 +7,10 @@ namespace live.SARSCoV2.Module.Base
     {
         #region Properties
 
-        public static object Chainlock => new object();
         public static string Domain => Environment.UserName.ToString();
-        public static bool IsVisibleMessage { get; private set; }
+
+        private static bool IsVisibleMessage = false;
+        private static object Chainlock = new object();
 
         public enum JobType
         {
