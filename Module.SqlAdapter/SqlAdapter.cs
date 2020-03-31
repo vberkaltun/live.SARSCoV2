@@ -9,7 +9,7 @@ namespace live.SARSCoV2.Module.SqlAdapter
     {
         #region Properties
 
-        public string ClassName => GetType().FullName;
+        public static string ClassName => typeof(SqlAdapter).FullName;
 
         public string Server { get; private set; }
         public string Username { get; private set; }

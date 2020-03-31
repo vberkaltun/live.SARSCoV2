@@ -8,7 +8,7 @@ namespace live.SARSCoV2.Module.Scheduler
     {
         #region Properties
 
-        public string ClassName => typeof(T).FullName;
+        public static string ClassName => typeof(T).FullName;
 
         public string Path { get; private set; }
         public int Interval { get; private set; }

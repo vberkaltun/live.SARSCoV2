@@ -10,7 +10,7 @@ namespace live.SARSCoV2.Module.HttpRequest
     {
         #region Properties
 
-        public string ClassName => typeof(T).FullName;
+        public static string ClassName => typeof(T).FullName;
         public HttpClient Client { get; private set; }
 
         #endregion
