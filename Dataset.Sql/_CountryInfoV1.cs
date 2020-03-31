@@ -5,8 +5,5 @@
         public readonly string Domain;
         public readonly string ISO2;
         public readonly string ISO3;
-
-        public readonly double Latitude;
-        public readonly double Longitude;
     }
 }
