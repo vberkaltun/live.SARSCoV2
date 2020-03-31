@@ -2,7 +2,7 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    struct Statistics
+    class Statistics
     {
         [JsonProperty(PropertyName = "confirmed")]
         public readonly long Cases;

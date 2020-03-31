@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AutoMapper;
+using live.SARSCoV2.Dataset.Http;
+using live.SARSCoV2.Dataset.Sql;
+using System;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2
@@ -89,6 +92,74 @@ namespace live.SARSCoV2
 
             PrintMessage(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
                 EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING), JobType.Informational);
+        }
+
+        public static void InitAutomapper()
+        {
+            // initialize the mapper
+            var configofGeneral = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Dataset.Http.General, Dataset.Sql.General>()
+                .ForMember(tar => tar.Updated,              sor => sor.MapFrom(src => src.Updated))
+                
+                .ForMember(tar => tar.Statistics.Cases,     sor => sor.MapFrom(src => src.Cases))
+                .ForMember(tar => tar.Statistics.Deaths,    sor => sor.MapFrom(src => src.Deaths))
+                .ForMember(tar => tar.Statistics.Recovered, sor => sor.MapFrom(src => src.Recovered));
+            });
+
+
+            // initialize the mapper
+            var configofCountry1 = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Dataset.Http.CountryV1, Dataset.Sql.CountryV1>()
+                .ForMember(tar => tar.Updated,              sor => sor.MapFrom(src => src.Updated))
+                
+                .ForMember(tar => tar.DomainInfo.Domain,    sor => sor.MapFrom(src => src.DomainInfo.Domain))
+                .ForMember(tar => tar.DomainInfo.ISO2,      sor => sor.MapFrom(src => src.DomainInfo.ISO2))
+                .ForMember(tar => tar.DomainInfo.ISO3,      sor => sor.MapFrom(src => src.DomainInfo.ISO3))
+                .ForMember(tar => tar.DomainInfo.Latitude,  sor => sor.MapFrom(src => src.DomainInfo.Latitude))
+                .ForMember(tar => tar.DomainInfo.Longitude, sor => sor.MapFrom(src => src.DomainInfo.Longitude))
+                
+                .ForMember(tar => tar.PerOneMillion.Cases,  sor => sor.MapFrom(src => src.CasesPerOneMillion))
+                .ForMember(tar => tar.PerOneMillion.Deaths, sor => sor.MapFrom(src => src.DeathsPerOneMillion))
+                
+                .ForMember(tar => tar.Today.Cases,          sor => sor.MapFrom(src => src.TodayCases))
+                .ForMember(tar => tar.Today.Deaths,         sor => sor.MapFrom(src => src.TodayDeaths));
+            });
+
+            // initialize the mapper
+            var configofCountry2 = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Dataset.Http.CountryV2, Dataset.Sql.CountryV2>()
+                .ForMember(tar => tar.Updated, sor => sor.MapFrom(src => src.Updated))
+
+                .ForMember(tar => tar.DomainInfo.Domain,    sor => sor.MapFrom(src => src.Domain))
+                .ForMember(tar => tar.DomainInfo.Province,  sor => sor.MapFrom(src => src.Province))
+                //.ForMember(tar => tar.DomainInfo.ISO2, sor => sor.MapFrom(src => src.DomainInfo.ISO2))
+                //.ForMember(tar => tar.DomainInfo.ISO3, sor => sor.MapFrom(src => src.DomainInfo.ISO3))
+                .ForMember(tar => tar.DomainInfo.Latitude,  sor => sor.MapFrom(src => src.Coordinates.Latitude))
+                .ForMember(tar => tar.DomainInfo.Longitude, sor => sor.MapFrom(src => src.Coordinates.Longitude))
+
+                .ForMember(tar => tar.Statistics.Cases,     sor => sor.MapFrom(src => src.Statistics.Cases))
+                .ForMember(tar => tar.Statistics.Deaths,    sor => sor.MapFrom(src => src.Statistics.Deaths))
+                .ForMember(tar => tar.Statistics.Recovered, sor => sor.MapFrom(src => src.Statistics.Recovered));
+            });
+
+            // initialize the mapper
+            var configofHistorical = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Dataset.Http.Historical, Dataset.Sql.Historical>()
+                .ForMember(tar => tar.DomainInfo.Domain,    sor => sor.MapFrom(src => src.Domain))
+                .ForMember(tar => tar.DomainInfo.Province,  sor => sor.MapFrom(src => src.Province))
+                //.ForMember(tar => tar.DomainInfo.ISO2, sor => sor.MapFrom(src => src.DomainInfo.ISO2))
+                //.ForMember(tar => tar.DomainInfo.ISO3, sor => sor.MapFrom(src => src.DomainInfo.ISO3))
+                //.ForMember(tar => tar.DomainInfo.Latitude, sor => sor.MapFrom(src => src.DomainInfo.Latitude))
+                //.ForMember(tar => tar.DomainInfo.Longitude, sor => sor.MapFrom(src => src.DomainInfo.Longitude))
+
+                .ForMember(tar => tar.Statistics.Cases,     sor => sor.MapFrom(src => src.Timeline.Cases))
+                .ForMember(tar => tar.Statistics.Deaths,    sor => sor.MapFrom(src => src.Timeline.Deaths))
+                .ForMember(tar => tar.Statistics.Recovered, sor => sor.MapFrom(src => src.Timeline.Recovered));
+            });
         }
 
         #endregion

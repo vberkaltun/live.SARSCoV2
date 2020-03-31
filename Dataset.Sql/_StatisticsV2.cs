@@ -1,9 +1,7 @@
 ﻿namespace live.SARSCoV2.Dataset.Sql
 {
-    struct Statistics
+    class StatisticsV2 : StatisticsV1
     {
-        public readonly long Cases;
-        public readonly long Deaths;
         public readonly long Recovered;
     }
 }

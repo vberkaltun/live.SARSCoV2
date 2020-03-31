@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿﻿using Newtonsoft.Json;
 
 namespace live.SARSCoV2.Dataset.Http
 {
@@ -10,13 +10,7 @@ namespace live.SARSCoV2.Dataset.Http
         [JsonProperty(PropertyName = "province")]
         public readonly string Province;
 
-        [JsonProperty(PropertyName = "updatedAt")]
-        public readonly string Updated;
-
-        [JsonProperty(PropertyName = "stats")]
-        public readonly Statistics Statistics;
-
-        [JsonProperty(PropertyName = "coordinates")]
-        public readonly Coordinates Coordinates;
+        [JsonProperty(PropertyName = "timeline")]
+        public readonly Timeline Timeline;
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Sql
 {
-    struct Today
+    class StatisticsV1
     {
         public readonly long Cases;
         public readonly long Deaths;

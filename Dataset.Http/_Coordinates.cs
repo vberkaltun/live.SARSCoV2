@@ -2,7 +2,7 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    struct Coordinates
+    class Coordinates
     {
         [JsonProperty(PropertyName = "latitude")]
         public readonly double Latitude;

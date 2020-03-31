@@ -2,7 +2,7 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    struct CountryInfo
+    class CountryInfo
     {
         [JsonProperty(PropertyName = "_id")]
         public readonly long ID;

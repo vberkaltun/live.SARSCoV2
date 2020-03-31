@@ -2,7 +2,7 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    struct Country
+    struct CountryV1
     {
         [JsonProperty(PropertyName = "country")]
         public readonly string Domain;
