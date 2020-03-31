@@ -33,16 +33,16 @@ namespace live.SARSCoV2
                         PrintMessage(message, ConsoleColor.Blue);
                         break;
 
-                    case JobType.HTTPRequest:
-                        PrintMessage(string.Format("HTTP_REQ:{0}", message), ConsoleColor.DarkMagenta);
+                    case JobType.Initialize:
+                        PrintMessage(string.Format("TASK_INT:{0}", message), ConsoleColor.Yellow);
                         break;
 
-                    case JobType.Scheduled:
-                        PrintMessage(string.Format("TASK_SCH:{0}", message), ConsoleColor.Yellow);
+                    case JobType.Read:
+                        PrintMessage(string.Format("HTTP_REA:{0}", message), ConsoleColor.DarkMagenta);
                         break;
 
-                    case JobType.Executed:
-                        PrintMessage(string.Format("TASK_EXE:{0}", message), ConsoleColor.Magenta);
+                    case JobType.Write:
+                        PrintMessage(string.Format("TASK_WRI:{0}", message), ConsoleColor.Magenta);
                         break;
 
                     case JobType.Error:
@@ -50,7 +50,7 @@ namespace live.SARSCoV2
                         break;
 
                     case JobType.Succesfull:
-                        PrintMessage(string.Format("TASK_OKK:{0}", message), ConsoleColor.Green);
+                        PrintMessage(string.Format("TASK_SUC:{0}", message), ConsoleColor.Green);
                         break;
                 }
             }

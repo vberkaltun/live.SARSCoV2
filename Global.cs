@@ -21,13 +21,9 @@ namespace live.SARSCoV2
 
         public enum JobType
         {
-            General,
-            Informational,
-            HTTPRequest,
-            Scheduled,
-            Executed,
-            Error,
-            Succesfull,
+            General, Informational, Initialize,
+            Read, Write,
+            Error, Succesfull,
         }
     }
 }

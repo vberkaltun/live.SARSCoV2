@@ -12,7 +12,7 @@ namespace live.SARSCoV2.Scheduler
             Interval = interval;
 
             // print message
-            Extension.PrintMessage(ClassName, JobType.Scheduled);
+            Extension.PrintMessage(ClassName, JobType.Initialize);
 
             // schedular
             Schedule<InheritTask>().NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
@@ -26,7 +26,7 @@ namespace live.SARSCoV2.Scheduler
             public override async void Execute()
             {
                 // print message
-                Extension.PrintMessage(ClassName, JobType.Executed);
+                Extension.PrintMessage(ClassName, JobType.Read);
 
                 // call base
                 await new InheritHttpRequest<T>().GetAsync(Path);

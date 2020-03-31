@@ -8,7 +8,7 @@ namespace live.SARSCoV2.HttpRequest
         public override async Task<T> GetAsync(string path)
         {
             // print message
-            Extension.PrintMessage(ClassName, JobType.HTTPRequest);
+            Extension.PrintMessage(ClassName, JobType.Read);
 
             // call base
             return await base.GetAsync(path);
