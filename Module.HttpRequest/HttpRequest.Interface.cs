@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace live.SARSCoV2.HttpRequest
+namespace live.SARSCoV2.Module.HttpRequest
 {
     interface IHttpRequest<T>
     {

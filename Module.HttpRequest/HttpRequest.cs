@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using static live.SARSCoV2.Global;
 
-namespace live.SARSCoV2.HttpRequest
+namespace live.SARSCoV2.Module.HttpRequest
 {
     partial class HttpRequest<T> : IHttpRequest<T>
     {

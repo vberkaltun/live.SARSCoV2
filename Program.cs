@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using FluentScheduler;
 using live.SARSCoV2.Dataset.Http;
-using live.SARSCoV2.Scheduler;
-using live.SARSCoV2.SqlAdapter;
+using live.SARSCoV2.Module.Scheduler;
+using live.SARSCoV2.Module.SqlAdapter;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2

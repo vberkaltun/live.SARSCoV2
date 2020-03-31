@@ -1,8 +1,8 @@
 ﻿using FluentScheduler;
-using live.SARSCoV2.HttpRequest;
+using live.SARSCoV2.Module.HttpRequest;
 using static live.SARSCoV2.Global;
 
-namespace live.SARSCoV2.Scheduler
+namespace live.SARSCoV2.Module.Scheduler
 {
     partial class Scheduler<T> : Registry, IScheduler
     {

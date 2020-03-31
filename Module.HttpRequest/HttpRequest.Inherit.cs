@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using static live.SARSCoV2.Global;
 
-namespace live.SARSCoV2.HttpRequest
+namespace live.SARSCoV2.Module.HttpRequest
 {
     class InheritHttpRequest<T> : HttpRequest<T>
     {

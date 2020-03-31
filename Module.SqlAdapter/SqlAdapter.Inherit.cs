@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using static live.SARSCoV2.Global;
 
-namespace live.SARSCoV2.SqlAdapter
+namespace live.SARSCoV2.Module.SqlAdapter
 {
     class InheritSqlAdapter : SqlAdapter
     {

@@ -1,4 +1,4 @@
-﻿namespace live.SARSCoV2.Scheduler
+﻿namespace live.SARSCoV2.Module.Scheduler
 {
     interface IScheduler
     {
