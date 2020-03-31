@@ -50,6 +50,7 @@ namespace live.SARSCoV2
                 .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.DomainInfo.Domain))
                 .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => src.DomainInfo.ISO2))
                 .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => src.DomainInfo.ISO3))
+
                 .ForMember(tar => tar.DomainInfo.Latitude, src => src.MapFrom(src => src.DomainInfo.Latitude))
                 .ForMember(tar => tar.DomainInfo.Longitude, src => src.MapFrom(src => src.DomainInfo.Longitude))
 
@@ -67,11 +68,13 @@ namespace live.SARSCoV2
                 .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
 
                 .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
-                .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
                 .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => Extension.GetCountryInfo(src.Domain).TwoLetterCode))
                 .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => Extension.GetCountryInfo(src.Domain).ThreeLetterCode))
+
                 .ForMember(tar => tar.DomainInfo.Latitude, src => src.MapFrom(src => src.Coordinates.Latitude))
                 .ForMember(tar => tar.DomainInfo.Longitude, src => src.MapFrom(src => src.Coordinates.Longitude))
+
+                .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
 
                 .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Statistics.Cases))
                 .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Statistics.Deaths))
@@ -83,9 +86,10 @@ namespace live.SARSCoV2
             {
                 cfg.CreateMap<Dataset.Http.Historical, Dataset.Sql.Historical>()
                 .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
-                .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
                 .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => Extension.GetCountryInfo(src.Domain).TwoLetterCode))
                 .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => Extension.GetCountryInfo(src.Domain).ThreeLetterCode))
+
+                .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
 
                 .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Timeline.Cases))
                 .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Timeline.Deaths))

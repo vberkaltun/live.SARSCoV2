@@ -2,7 +2,6 @@
 {
     class CountryInfoV3 : CountryInfoV2
     {
-        public readonly double Latitude;
-        public readonly double Longitude;
+        public readonly string Province;
     }
 }
