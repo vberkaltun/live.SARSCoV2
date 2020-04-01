@@ -4,7 +4,6 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using AutoMapper;
 using FluentScheduler;
 using live.SARSCoV2.Dataset.Http;
 using live.SARSCoV2.Module.Base;
@@ -14,12 +13,28 @@ using live.SARSCoV2.Module.SqlAdapter;
 using live.SARSCoV2.Module.SqlQuery;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
-using static live.SARSCoV2.Global;
+using CountryISO = ISO3166.Country;
 
 namespace live.SARSCoV2
 {
     class SARSCoV2 : BaseMember
     {
+        #region Constants
+
+        public readonly char EXIT_CODE = 'E';
+        public readonly int SCHEDULED_JOB_INTERVAL = 300;
+        public readonly NullValueHandling NULL_VALUE_HANDLING = NullValueHandling.Ignore;
+
+        public readonly string SQL_SERVER = "127.0.0.1";
+        public readonly string SQL_USERNAME = "root";
+        public readonly string SQL_PASSWORD = "8965";
+        public readonly string SQL_DATABASE = "live.sarscov2";
+
+        public readonly string APP_NAME = Assembly.GetExecutingAssembly().GetName().Name.ToString();
+        public readonly string APP_VERSION = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+        #endregion
+
         #region Properties
 
         JsonSerializerSettings JsonSerializerSettings;
@@ -68,34 +83,40 @@ namespace live.SARSCoV2
 
         ~SARSCoV2() => Task.Run(async () => await Sql.DisconnectAsync()).Wait();
 
-        public async void TaskGeneralAsync()
+        private async void TaskGeneralAsync()
         {
             General general = await General.GetAsync();
 
-            IMapper httpToJson = JSON.General.CreateMapper();
-            IMapper jsonToSql = SQL.General.CreateMapper();
-
-            var srcHttpToJson = httpToJson.Map<Dataset.Http.General, Dataset.Json.General>(general);
-            var srcJsonToSql = jsonToSql.Map<Dataset.Json.General, Dataset.Sql.General>(srcHttpToJson);
-
             Sql.Insert(new Query<Dataset.Sql.General>(srcJsonToSql), "general");
         }
-        public async void TaskCountry()
+        private async void TaskCountry()
         {
             List<Country> country = await Country.GetAsync();
         }
-        public async void TaskHistorical()
+        private async void TaskHistorical()
         {
             List<Historical> historical = await Historical.GetAsync();
         }
 
-        public void PrintAppInfo()
+        private void PrintAppInfo()
         {
             Logger.Informational(string.Format("{0} {1}",
                 APP_NAME, APP_VERSION));
 
             Logger.Informational(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
                 EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING));
+        }
+        private CountryISO GetCountryInfo(string country)
+        {
+            var result1 = CountryISO.List.FirstOrDefault(src => src.Name == country);
+            var result2 = CountryISO.List.FirstOrDefault(src => src.TwoLetterCode == country);
+            var result3 = CountryISO.List.FirstOrDefault(src => src.ThreeLetterCode == country);
+            var result4 = CountryISO.List.FirstOrDefault(src => src.NumericCode == country);
+
+            return result1 != null ? result1 :
+                (result2 != null ? result2 :
+                (result3 != null ? result3 :
+                (result4 != null ? result4 : null)));
         }
 
         #endregion
@@ -126,130 +147,6 @@ namespace live.SARSCoV2
                 command.Parameters.AddWithValue(string.Format("@{0}", item.Key), item.Value);
 
             command.ExecuteNonQuery();
-        }
-
-        #endregion
-    }
-
-    public static class Global
-    {
-        #region Properties
-
-        public const char EXIT_CODE = 'E';
-        public const int SCHEDULED_JOB_INTERVAL = 300;
-        public const NullValueHandling NULL_VALUE_HANDLING = NullValueHandling.Ignore;
-
-        public const string SQL_SERVER = "127.0.0.1";
-        public const string SQL_USERNAME = "root";
-        public const string SQL_PASSWORD = "8965";
-        public const string SQL_DATABASE = "live.sarscov2";
-
-        public readonly static string APP_NAME = Assembly.GetExecutingAssembly().GetName().Name.ToString();
-        public readonly static string APP_VERSION = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
-        #endregion
-
-        #region Classes
-
-        public class JSON
-        {
-            // initialize the mapper
-            public static readonly MapperConfiguration Statistics = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Http.General, Dataset.Json.Statistics>()
-                .ForPath(tar => tar.Cases, src => src.MapFrom(src => src.Cases))
-                .ForPath(tar => tar.Deaths, src => src.MapFrom(src => src.Deaths))
-                .ForPath(tar => tar.Recovered, src => src.MapFrom(src => src.Recovered));
-            });
-
-            // initialize the mapper
-            public static readonly MapperConfiguration General = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Http.General, Dataset.Json.General>()
-                .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
-                .ForMember(tar => tar.Statistics, src => src.MapFrom(sub => Statistics.CreateMapper().Map<Dataset.Http.General, Dataset.Json.Statistics>(sub)));
-            });
-
-            // initialize the mapper
-            public static readonly MapperConfiguration Country = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Http.Country, Dataset.Json.Country>()
-                .ForPath(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
-
-                .ForPath(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
-                .ForPath(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
-                .ForPath(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
-                .ForPath(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
-                .ForPath(tar => tar.DomainInfo.Latitude, src => src.MapFrom(src => src.Coordinates.Latitude))
-                .ForPath(tar => tar.DomainInfo.Longitude, src => src.MapFrom(src => src.Coordinates.Longitude))
-
-                .ForPath(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Statistics.Cases))
-                .ForPath(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Statistics.Deaths))
-                .ForPath(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Statistics.Recovered));
-            });
-
-            // initialize the mapper
-            public static readonly MapperConfiguration Historical = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Http.Historical, Dataset.Json.Historical>()
-                .ForPath(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
-                .ForPath(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
-                .ForPath(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
-                .ForPath(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
-
-                .ForPath(tar => tar.Timeline.Cases, src => src.MapFrom(src => src.Timeline.Cases))
-                .ForPath(tar => tar.Timeline.Deaths, src => src.MapFrom(src => src.Timeline.Deaths))
-                .ForPath(tar => tar.Timeline.Recovered, src => src.MapFrom(src => src.Timeline.Recovered));
-            });
-        }
-
-        public class SQL
-        {
-            // initialize the mapper
-            public static readonly MapperConfiguration General = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Json.General, Dataset.Sql.General>()
-                .ForPath(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
-                .ForPath(tar => tar.Content, src => src.MapFrom(src => JsonConvert.SerializeObject(src)));
-            });
-
-            // initialize the mapper
-            public static readonly MapperConfiguration Country = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Json.Country, Dataset.Sql.Country>()
-                .ForPath(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
-                .ForPath(tar => tar.CountryISO2, src => src.MapFrom(src => GetCountryInfo(src.DomainInfo.ISO2).TwoLetterCode))
-                .ForPath(tar => tar.CountryISO3, src => src.MapFrom(src => GetCountryInfo(src.DomainInfo.ISO3).ThreeLetterCode))
-                .ForPath(tar => tar.Province, src => src.MapFrom(src => src.DomainInfo.Province))
-                .ForPath(tar => tar.Content, src => src.MapFrom(src => JsonConvert.SerializeObject(src)));
-            });
-
-            // initialize the mapper
-            public static readonly MapperConfiguration Historical = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Json.Historical, Dataset.Sql.Historical>()
-                .ForPath(tar => tar.CountryISO2, src => src.MapFrom(src => GetCountryInfo(src.DomainInfo.ISO2).TwoLetterCode))
-                .ForPath(tar => tar.CountryISO3, src => src.MapFrom(src => GetCountryInfo(src.DomainInfo.ISO3).ThreeLetterCode))
-                .ForPath(tar => tar.Province, src => src.MapFrom(src => src.DomainInfo.Province))
-                .ForPath(tar => tar.Content, src => src.MapFrom(src => JsonConvert.SerializeObject(src)));
-            });
-        }
-
-        #endregion
-
-        #region Methods
-
-        private static ISO3166.Country GetCountryInfo(string country)
-        {
-            var result1 = ISO3166.Country.List.FirstOrDefault(src => src.Name == country);
-            var result2 = ISO3166.Country.List.FirstOrDefault(src => src.TwoLetterCode == country);
-            var result3 = ISO3166.Country.List.FirstOrDefault(src => src.ThreeLetterCode == country);
-            var result4 = ISO3166.Country.List.FirstOrDefault(src => src.NumericCode == country);
-
-            return result1 != null ? result1 :
-                (result2 != null ? result2 :
-                (result3 != null ? result3 :
-                (result4 != null ? result4 : null)));
         }
 
         #endregion
