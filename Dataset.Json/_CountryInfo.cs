@@ -6,7 +6,5 @@
         public string Province { get; set; }
         public string ISO2 { get; set; }
         public string ISO3 { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
     }
 }

@@ -3,9 +3,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentScheduler;
-using live.SARSCoV2.Dataset.Http;
 using live.SARSCoV2.Module.Base;
 using live.SARSCoV2.Module.HttpRequest;
 using live.SARSCoV2.Module.Scheduler;
@@ -14,6 +14,9 @@ using live.SARSCoV2.Module.SqlQuery;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using CountryISO = ISO3166.Country;
+using Http = live.SARSCoV2.Dataset.Http;
+using Json = live.SARSCoV2.Dataset.Json;
+using Sql = live.SARSCoV2.Dataset.Sql;
 
 namespace live.SARSCoV2
 {
@@ -37,13 +40,15 @@ namespace live.SARSCoV2
 
         #region Properties
 
-        JsonSerializerSettings JsonSerializerSettings;
-        ISqlAdapter Sql;
-        HttpClient Client;
+        public static SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
 
-        HttpRequest<General> General;
-        HttpRequest<List<Country>> Country;
-        HttpRequest<List<Historical>> Historical;
+        private JsonSerializerSettings JsonSerializerSettings;
+        private ISqlAdapter SqlClient;
+        private HttpClient HttpClient;
+
+        private HttpRequest<Http.General> General;
+        private HttpRequest<List<Http.Country>> Country;
+        private HttpRequest<List<Http.Historical>> Historical;
 
         #endregion
 
@@ -51,24 +56,7 @@ namespace live.SARSCoV2
 
         public SARSCoV2()
         {
-            // init variable
-            JsonSerializerSettings = new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING };
-            Sql = new SqlAdapterOfSARSCoV2(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
-            Client = new HttpClient();
-
-            General = new HttpRequest<General>(Client, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
-            Country = new HttpRequest<List<Country>>(Client, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
-            Historical = new HttpRequest<List<Historical>>(Client, @"https://corona.lmao.ninja/v2/historical", JsonSerializerSettings);
-
-            // init console
-            Logger.SetVisibleMessage();
-            PrintAppInfo();
-            Task.Run(async () => await Sql.ConnectAsync()).Wait();
-
-            // init scheduler
-            JobManager.Initialize(new Scheduler(TaskGeneralAsync, 10));
-            JobManager.Initialize(new Scheduler(TaskCountry, 10));
-            JobManager.Initialize(new Scheduler(TaskHistorical, 10));
+            Init();
 
             while (true)
             {
@@ -81,21 +69,62 @@ namespace live.SARSCoV2
             }
         }
 
-        ~SARSCoV2() => Task.Run(async () => await Sql.DisconnectAsync()).Wait();
+        private void Init()
+        {
+            // init variable
+            JsonSerializerSettings = new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING };
+            SqlClient = new SqlAdapterOfSARSCoV2(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
+            HttpClient = new HttpClient();
+
+            // init request
+            General = new HttpRequest<Http.General>(HttpClient, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
+            Country = new HttpRequest<List<Http.Country>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
+            Historical = new HttpRequest<List<Http.Historical>>(HttpClient, @"https://corona.lmao.ninja/v2/historical", JsonSerializerSettings);
+
+            // init console
+            Logger.SetVisibleMessage();
+            PrintAppInfo();
+
+            // init scheduler
+            JobManager.Initialize(new Scheduler(TaskGeneralAsync, 10));
+            JobManager.Initialize(new Scheduler(TaskCountry, 10));
+            JobManager.Initialize(new Scheduler(TaskHistorical, 10));
+        }
 
         private async void TaskGeneralAsync()
         {
-            General general = await General.GetAsync();
+            await Semaphore.WaitAsync();
+            await SqlClient.ConnectAsync();
 
-            Sql.Insert(new Query<Dataset.Sql.General>(srcJsonToSql), "general");
+            Http.General general = await General.GetAsync();
+            SqlClient.Insert(new Query<Sql.General>(general.ToJson().ToSql()), "general");
+
+            await SqlClient.DisconnectAsync();
+            Semaphore.Release();
         }
         private async void TaskCountry()
         {
-            List<Country> country = await Country.GetAsync();
+            await Semaphore.WaitAsync();
+            await SqlClient.ConnectAsync();
+
+            List<Http.Country> country = await Country.GetAsync();
+            foreach (var item in country)
+                SqlClient.Insert(new Query<Sql.Country>(item.ToJson().ToSql()), "country");
+
+            await SqlClient.DisconnectAsync();
+            Semaphore.Release();
         }
         private async void TaskHistorical()
         {
-            List<Historical> historical = await Historical.GetAsync();
+            await Semaphore.WaitAsync();
+            await SqlClient.ConnectAsync();
+
+            List<Http.Historical> historical = await Historical.GetAsync();
+            foreach (var item in historical)
+                SqlClient.Insert(new Query<Sql.Historical>(item.ToJson().ToSql()), "historical");
+
+            await SqlClient.DisconnectAsync();
+            Semaphore.Release();
         }
 
         private void PrintAppInfo()
@@ -105,18 +134,6 @@ namespace live.SARSCoV2
 
             Logger.Informational(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
                 EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING));
-        }
-        private CountryISO GetCountryInfo(string country)
-        {
-            var result1 = CountryISO.List.FirstOrDefault(src => src.Name == country);
-            var result2 = CountryISO.List.FirstOrDefault(src => src.TwoLetterCode == country);
-            var result3 = CountryISO.List.FirstOrDefault(src => src.ThreeLetterCode == country);
-            var result4 = CountryISO.List.FirstOrDefault(src => src.NumericCode == country);
-
-            return result1 != null ? result1 :
-                (result2 != null ? result2 :
-                (result3 != null ? result3 :
-                (result4 != null ? result4 : null)));
         }
 
         #endregion

@@ -40,6 +40,9 @@ namespace live.SARSCoV2.Module.SqlAdapter
             // print message
             Logger.Succesfull(ClassName);
 
+            // check connection
+            if (IsConnected) return;
+
             Connection = new MySqlConnection(GetConnectionString());
 
             await Connection.OpenAsync();
@@ -49,6 +52,9 @@ namespace live.SARSCoV2.Module.SqlAdapter
         {
             // print message
             Logger.Error(ClassName);
+
+            // check connection
+            if (!IsConnected) return;
 
             await Connection.CloseAsync();
             IsConnected = false;

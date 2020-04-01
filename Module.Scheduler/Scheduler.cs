@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using FluentScheduler;
 using live.SARSCoV2.Module.Base;
 
@@ -8,6 +10,7 @@ namespace live.SARSCoV2.Module.Scheduler
     {
         #region Properties
 
+        public static SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
         public static string ClassName => typeof(Scheduler).FullName;
 
         public Guid ID { get; private set; } = Guid.NewGuid();
@@ -43,7 +46,7 @@ namespace live.SARSCoV2.Module.Scheduler
             Logger.Read(ClassName);
 
             // schedular
-            Schedule(() => Executed?.Invoke()).WithName(ID.ToString()).NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
+            Schedule(async () => await Trigger()).WithName(ID.ToString()).NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
         }
         public void Terminate()
         {
@@ -52,6 +55,13 @@ namespace live.SARSCoV2.Module.Scheduler
 
             // remove task
             JobManager.RemoveJob(ID.ToString());
+        }
+
+        protected async Task Trigger()
+        {
+            await Semaphore.WaitAsync();
+            Executed?.Invoke();
+            Semaphore.Release();
         }
 
         #endregion
