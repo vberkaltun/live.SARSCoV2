@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Reflection;
 
 namespace live.SARSCoV2.Module.SqlQuery
 {

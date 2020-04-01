@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net.Http;
 using FluentScheduler;
 using live.SARSCoV2.Dataset.Http;

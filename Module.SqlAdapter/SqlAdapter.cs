@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using live.SARSCoV2.Module.Base;
 using live.SARSCoV2.Module.SqlQuery;
 using static live.SARSCoV2.Global;
-using System;
-using System.Reflection;
-using System.Linq;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {
@@ -76,7 +73,6 @@ namespace live.SARSCoV2.Module.SqlAdapter
 
             command.ExecuteNonQuery();
         }
-
 
         public string GetConnectionString() => string.Format(@"server={0}; uid={1}; pwd={2}; database={3}", Server, Username, Password, Database);
 
