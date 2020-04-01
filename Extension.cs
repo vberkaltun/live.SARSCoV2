@@ -5,8 +5,8 @@ using Json = live.SARSCoV2.Dataset.Json;
 using Http = live.SARSCoV2.Dataset.Http;
 using Sql = live.SARSCoV2.Dataset.Sql;
 using System;
-using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace live.SARSCoV2
 {
@@ -16,34 +16,28 @@ namespace live.SARSCoV2
 
         public static Json.Country ToJson(this Http.Country var)
         {
-            string ISO2 = GetCountryInfo(var.Domain).TwoLetterCode;
-            string ISO3 = GetCountryInfo(var.Domain).ThreeLetterCode;
-
-            var DomainInfo = new Json.CountryInfo
-            {
-                Domain = var.Domain,
-                Province = var.Province,
-                ISO2 = ISO2,
-                ISO3 = ISO3
-            };
-            var  Coordinates = new Json.Coordinates
-            {
-                Latitude = var.Coordinates.Latitude,
-                Longitude = var.Coordinates.Longitude
-            };
-            var Statistics = new Json.Statistics
-            {
-                Cases = var.Statistics.Cases,
-                Deaths = var.Statistics.Deaths,
-                Recovered = var.Statistics.Recovered
-            };
-
             return new Json.Country
             {
                 Updated = DateTime.Parse(var.Updated).ToUnixTime(),
-                DomainInfo = DomainInfo,
-                Coordinates = Coordinates,
-                Statistics = Statistics
+                DomainInfo = new Json.CountryInfo
+                {
+                    Domain = var.Domain,
+                    Province = var.Province,
+                    ISO2 = GetCountryInfo(var.Domain).TwoLetterCode,
+                    ISO3 = GetCountryInfo(var.Domain).TwoLetterCode,
+
+                },
+                Coordinates = new Json.Coordinates
+                {
+                    Latitude = var.Coordinates.Latitude,
+                    Longitude = var.Coordinates.Longitude
+                },
+                Statistics = new Json.Statistics
+                {
+                    Cases = var.Statistics.Cases,
+                    Deaths = var.Statistics.Deaths,
+                    Recovered = var.Statistics.Recovered
+                }
             };
         }
         public static Json.General ToJson(this Http.General var)
@@ -61,27 +55,21 @@ namespace live.SARSCoV2
         }
         public static Json.Historical ToJson(this Http.Historical var)
         {
-            var ISO2 = GetCountryInfo(var.Domain).TwoLetterCode;
-            var ISO3 = GetCountryInfo(var.Domain).ThreeLetterCode;
-
-            var DomainInfo = new Json.CountryInfo
-            {
-                Domain = var.Domain,
-                Province = var.Province,
-                ISO2 = ISO2,
-                ISO3 = ISO3
-            };
-            var Timeline = new Json.Timeline
-            {
-                Cases = var.Timeline.Cases,
-                Deaths = var.Timeline.Deaths,
-                Recovered = var.Timeline.Recovered
-            };
-
             return new Json.Historical
             {
-                DomainInfo = DomainInfo,
-                Timeline = Timeline
+                DomainInfo = new Json.CountryInfo
+                {
+                    Domain = var.Domain,
+                    Province = var.Province,
+                    ISO2 = GetCountryInfo(var.Domain).TwoLetterCode,
+                    ISO3 = GetCountryInfo(var.Domain).TwoLetterCode
+                },
+                Timeline = new Json.Timeline
+                {
+                    Cases = var.Timeline.Cases,
+                    Deaths = var.Timeline.Deaths,
+                    Recovered = var.Timeline.Recovered
+                }
             };
         }
 
@@ -98,7 +86,7 @@ namespace live.SARSCoV2
                 Province = var.DomainInfo.Province,
                 DomainISO2 = var.DomainInfo.ISO2,
                 DomainISO3 = var.DomainInfo.ISO3,
-                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+                Content = JsonConvert.SerializeObject(var)
             };
         }
         public static Sql.General ToSql(this Json.General var)
@@ -106,7 +94,7 @@ namespace live.SARSCoV2
             return new Sql.General
             {
                 Updated = var.Updated,
-                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+                Content = JsonConvert.SerializeObject(var)
             };
         }
         public static Sql.Historical ToSql(this Json.Historical var)
@@ -117,7 +105,7 @@ namespace live.SARSCoV2
                 DomainISO2 = var.DomainInfo.ISO2,
                 DomainISO3 = var.DomainInfo.ISO3,
                 Province = var.DomainInfo.Province,
-                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+                Content = JsonConvert.SerializeObject(var)
             };
         }
 
