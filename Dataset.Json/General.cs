@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Json
 {
-    struct General
+    class General
     {
         public Statistics Statistics { get; set; }
 

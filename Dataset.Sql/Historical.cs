@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Sql
 {
-    struct Historical
+    class Historical
     {
         public string Domain { get; set; }
         public string DomainISO2 { get; set; }

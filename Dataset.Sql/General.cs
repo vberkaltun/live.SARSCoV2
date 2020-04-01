@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Sql
 {
-    struct General
+    class General
     {
         public long Updated { get; set; }
         public string Content { get; set; }

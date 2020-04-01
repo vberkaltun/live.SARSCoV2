@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Json
 {
-    struct Country
+    class Country
     {
         public CountryInfo DomainInfo { get; set; }
         public Coordinates Coordinates { get; set; }

@@ -2,7 +2,7 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    struct General
+    class General
     {
         [JsonProperty(PropertyName = "cases")]
         public long Cases { get; set; }

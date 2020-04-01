@@ -109,7 +109,17 @@ namespace live.SARSCoV2
 
             List<Http.Country> country = await Country.GetAsync();
             foreach (var item in country)
-                SqlClient.Insert(new Query<Sql.Country>(item.ToJson().ToSql()), "country");
+            {
+                var result = item.ToJson()?.ToSql();
+
+                if (result == null)
+                {
+                    Logger.Error(string.Format("Country<{0}> info can not found!", item.Domain));
+                    continue;
+                }
+
+                SqlClient.Insert(new Query<Sql.Country>(result), "country");
+            }
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -121,7 +131,17 @@ namespace live.SARSCoV2
 
             List<Http.Historical> historical = await Historical.GetAsync();
             foreach (var item in historical)
-                SqlClient.Insert(new Query<Sql.Historical>(item.ToJson().ToSql()), "historical");
+            {
+                var result = item.ToJson()?.ToSql();
+
+                if (result == null)
+                {
+                    Logger.Error(string.Format("Country<{0}><{1}> info can not found!", item.Domain, item));
+                    continue;
+                }
+                
+                SqlClient.Insert(new Query<Sql.Historical>(result), "historical");
+            }
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -148,9 +168,6 @@ namespace live.SARSCoV2
 
         public override void Insert<T>(Query<T> file, string tableName)
         {
-            // call first base
-            base.Insert(file, tableName);
-
             var template = @"INSERT INTO {0}({1}) VALUES({2})";
             var properties = file.GetProperties();
 

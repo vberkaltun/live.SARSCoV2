@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Sql
 {
-    struct Country
+    class Country
     {
         public long Updated { get; set; }
 

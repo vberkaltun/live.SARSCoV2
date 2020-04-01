@@ -16,6 +16,11 @@ namespace live.SARSCoV2
 
         public static Json.Country ToJson(this Http.Country var)
         {
+            var ISO = GetCountryInfo(var.Domain);
+
+            if (ISO == null)
+                return null;
+
             return new Json.Country
             {
                 Updated = DateTime.Parse(var.Updated).ToUnixTime(),
@@ -23,9 +28,8 @@ namespace live.SARSCoV2
                 {
                     Domain = var.Domain,
                     Province = var.Province,
-                    ISO2 = GetCountryInfo(var.Domain).TwoLetterCode,
-                    ISO3 = GetCountryInfo(var.Domain).TwoLetterCode,
-
+                    ISO2 = ISO.TwoLetterCode,
+                    ISO3 = ISO.TwoLetterCode,
                 },
                 Coordinates = new Json.Coordinates
                 {
@@ -55,14 +59,19 @@ namespace live.SARSCoV2
         }
         public static Json.Historical ToJson(this Http.Historical var)
         {
+            var ISO = GetCountryInfo(var.Domain);
+
+            if (ISO == null)
+                return null;
+
             return new Json.Historical
             {
                 DomainInfo = new Json.CountryInfo
                 {
                     Domain = var.Domain,
                     Province = var.Province,
-                    ISO2 = GetCountryInfo(var.Domain).TwoLetterCode,
-                    ISO3 = GetCountryInfo(var.Domain).TwoLetterCode
+                    ISO2 = ISO.TwoLetterCode,
+                    ISO3 = ISO.TwoLetterCode
                 },
                 Timeline = new Json.Timeline
                 {
@@ -115,31 +124,45 @@ namespace live.SARSCoV2
 
         public static CountryISO GetCountryInfo(string country)
         {
-            // remove in brackets
-            var names = GetCountryNames(country);
+            // fix names and remove in brackets
+            var names = GetCountryNames(FixCountryNames(country));
 
-            foreach (var item in names)
+            foreach (var name in names)
             {
-                var result1 = CountryISO.List.FirstOrDefault(src => src.Name.Contains(country));
-                var result2 = CountryISO.List.FirstOrDefault(src => src.TwoLetterCode.Contains(country));
-                var result3 = CountryISO.List.FirstOrDefault(src => src.ThreeLetterCode.Contains(country));
-                var result4 = CountryISO.List.FirstOrDefault(src => src.NumericCode.Contains(country));
-
-                if (result1 != null) return result1;
-                if (result2 != null) return result2;
-                if (result3 != null) return result3;
-                if (result4 != null) return result4;
+                foreach (var item in CountryISO.List)
+                {
+                    if (item.Name.Contains(name))
+                        return item;
+                    if (item.TwoLetterCode.Contains(name))
+                        return item;
+                    if (item.ThreeLetterCode.Contains(name))
+                        return item;
+                    if (item.NumericCode.Contains(name))
+                        return item;
+                }
             }
 
-            return default;
+            return null;
+        }
+        public static string FixCountryNames(string country)
+        {
+            // add all name hot fix to here 
+            country = country.Replace("Burma", "Myanmar");
+            country = country.Replace("Côte d'Ivoire", "384");
+            country = country.Replace("Cote d'Ivoire", "384");
+
+            return country;
         }
         public static List<string> GetCountryNames(string country)
         {
             List<string> result = new List<string>();
 
+            string output1 = Regex.Match(country, @"\(([^)]*)\)").Groups[1].Value;
+            string output2 = Regex.Replace(country, @" ?\(.*?\)", string.Empty);
+
             // remove in brackets
-            result.Add(Regex.Replace(country, @" ?\(.*?\)", string.Empty));
-            result.Add(Regex.Replace(country, @"rect64\(([a-f0-9]+)\)", string.Empty));
+            if (output1 != string.Empty) result.Add(output1);
+            if (output2 != string.Empty) result.Add(output2);
 
             return result;
         }
