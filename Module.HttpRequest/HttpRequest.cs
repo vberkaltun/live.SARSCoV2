@@ -5,7 +5,7 @@ using live.SARSCoV2.Module.Base;
 
 namespace live.SARSCoV2.Module.HttpRequest
 {
-    class HttpRequest<T> : Base.Base, IHttpRequest<T>
+    class HttpRequest<T> : BaseMember, IHttpRequest<T>
     {
         #region Properties
 

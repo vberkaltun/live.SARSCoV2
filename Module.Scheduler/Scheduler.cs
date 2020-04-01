@@ -4,7 +4,7 @@ using live.SARSCoV2.Module.Base;
 
 namespace live.SARSCoV2.Module.Scheduler
 {
-    class Scheduler : Base.Base, IScheduler
+    class Scheduler : BaseMember, IScheduler
     {
         #region Properties
 

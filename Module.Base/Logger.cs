@@ -28,7 +28,7 @@ namespace live.SARSCoV2.Module.Base
             lock (Chainlock)
             {
                 Console.ForegroundColor = color;
-                Print(string.Format("{0}<{1}>: <2>", DateTime.Now.ToString("yyyy/MM/dd-h:mm:ss"), Domain, message), newLine);
+                Print(string.Format("{0}<{1}>: {2}", DateTime.Now.ToString("yyyy/MM/dd-h:mm:ss"), Domain, message), newLine);
                 Console.ResetColor();
             }
         }

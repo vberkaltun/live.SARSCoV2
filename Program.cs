@@ -12,12 +12,12 @@ using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2
 {
-    class Program : Base
+    class Program : BaseMember
     {
         static void Main() => new SARSCoV2();
     }
 
-    class SARSCoV2 : Base
+    class SARSCoV2 : BaseMember
     {
         JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING };
 

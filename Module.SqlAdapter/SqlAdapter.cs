@@ -6,7 +6,7 @@ using live.SARSCoV2.Module.SqlQuery;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {
-    abstract class SqlAdapter : Base.Base, ISqlAdapter
+    abstract class SqlAdapter : BaseMember, ISqlAdapter
     {
         #region Properties
 

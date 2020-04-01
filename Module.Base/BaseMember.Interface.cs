@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Module.Base
 {
-    interface IBase
+    interface IBaseMember
     {
         Logger Logger { get; }
     }
