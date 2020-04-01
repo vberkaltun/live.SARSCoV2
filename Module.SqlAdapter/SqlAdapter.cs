@@ -38,7 +38,7 @@ namespace live.SARSCoV2.Module.SqlAdapter
         public async Task ConnectAsync()
         {
             // print message
-            Logger.Succesfull(ClassName);
+            Logger.Connect(ClassName);
 
             // check connection
             if (IsConnected) return;
@@ -51,7 +51,7 @@ namespace live.SARSCoV2.Module.SqlAdapter
         public async Task DisconnectAsync()
         {
             // print message
-            Logger.Error(ClassName);
+            Logger.Disconnect(ClassName);
 
             // check connection
             if (!IsConnected) return;

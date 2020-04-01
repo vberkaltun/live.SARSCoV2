@@ -107,6 +107,7 @@ namespace live.SARSCoV2
             await Semaphore.WaitAsync();
             await SqlClient.ConnectAsync();
 
+            int errorCount = 0;
             List<Http.Country> country = await Country.GetAsync();
             foreach (var item in country)
             {
@@ -114,12 +115,16 @@ namespace live.SARSCoV2
 
                 if (result == null)
                 {
-                    Logger.Error(string.Format("Country<{0}> info can not found!", item.Domain));
+                    Logger.Error(string.Format("Country<{0}><{1}> info can not found!", item.Domain, item));
+                    errorCount++;
                     continue;
                 }
 
                 SqlClient.Insert(new Query<Sql.Country>(result), "country");
             }
+
+            // shoe general status
+            Logger.Write(string.Format("Total {0}/{1} country info succesfull processed!", country.Count - errorCount, country.Count));
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -129,6 +134,7 @@ namespace live.SARSCoV2
             await Semaphore.WaitAsync();
             await SqlClient.ConnectAsync();
 
+            int errorCount = 0;
             List<Http.Historical> historical = await Historical.GetAsync();
             foreach (var item in historical)
             {
@@ -137,11 +143,15 @@ namespace live.SARSCoV2
                 if (result == null)
                 {
                     Logger.Error(string.Format("Country<{0}><{1}> info can not found!", item.Domain, item));
+                    errorCount++;
                     continue;
                 }
                 
                 SqlClient.Insert(new Query<Sql.Historical>(result), "historical");
             }
+
+            // shoe general status
+            Logger.Write(string.Format("Total {0}/{1} country info succesfull processed!", historical.Count - errorCount, historical.Count));
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
