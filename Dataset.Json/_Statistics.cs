@@ -1,9 +1,9 @@
 ﻿namespace live.SARSCoV2.Dataset.Json
 {
-    class Statistics
+    struct Statistics
     {
-        public long Cases { get; }
-        public long Deaths { get; }
-        public long Recovered { get; }
+        public long Cases { get; set; }
+        public long Deaths { get; set; }
+        public long Recovered { get; set; }
     }
 }

@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    class Timeline
+    struct Timeline
     {
         [JsonProperty(PropertyName = "cases")]
-        public Dictionary<string, long> Cases { get; }
+        public Dictionary<string, long> Cases { get; set; }
 
         [JsonProperty(PropertyName = "deaths")]
-        public Dictionary<string, long> Deaths { get; }
+        public Dictionary<string, long> Deaths { get; set; }
 
         [JsonProperty(PropertyName = "recovered")]
-        public Dictionary<string, long> Recovered { get; }
+        public Dictionary<string, long> Recovered { get; set; }
     }
 }

@@ -2,10 +2,10 @@
 
 namespace live.SARSCoV2.Dataset.Json
 {
-    class Timeline
+    struct Timeline
     {
-        public Dictionary<string, long> Cases { get; }
-        public Dictionary<string, long> Deaths { get; }
-        public Dictionary<string, long> Recovered { get; }
+        public Dictionary<string, long> Cases { get; set; }
+        public Dictionary<string, long> Deaths { get; set; }
+        public Dictionary<string, long> Recovered { get; set; }
     }
 }

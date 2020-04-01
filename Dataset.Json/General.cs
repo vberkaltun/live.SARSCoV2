@@ -2,8 +2,8 @@
 {
     struct General
     {
-        public Statistics Statistics { get; }
+        public Statistics Statistics { get; set; }
 
-        public long Updated { get; }
+        public long Updated { get; set; }
     }
 }

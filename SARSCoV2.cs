@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 using AutoMapper;
 using FluentScheduler;
 using live.SARSCoV2.Dataset.Http;
@@ -22,8 +23,8 @@ namespace live.SARSCoV2
         #region Properties
 
         JsonSerializerSettings JsonSerializerSettings;
+        ISqlAdapter Sql;
         HttpClient Client;
-        SqlAdapterOfSARSCoV2 Sql;
 
         HttpRequest<General> General;
         HttpRequest<List<Country>> Country;
@@ -37,8 +38,8 @@ namespace live.SARSCoV2
         {
             // init variable
             JsonSerializerSettings = new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING };
+            Sql = new SqlAdapterOfSARSCoV2(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
             Client = new HttpClient();
-            Sql = new SqlAdapterOfSARSCoV2();
 
             General = new HttpRequest<General>(Client, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
             Country = new HttpRequest<List<Country>>(Client, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
@@ -47,6 +48,7 @@ namespace live.SARSCoV2
             // init console
             Logger.SetVisibleMessage();
             PrintAppInfo();
+            Task.Run(async () => await Sql.ConnectAsync()).Wait();
 
             // init scheduler
             JobManager.Initialize(new Scheduler(TaskGeneralAsync, 10));
@@ -64,11 +66,11 @@ namespace live.SARSCoV2
             }
         }
 
+        ~SARSCoV2() => Task.Run(async () => await Sql.DisconnectAsync()).Wait();
+
         public async void TaskGeneralAsync()
         {
             General general = await General.GetAsync();
-
-            await Sql.ConnectAsync();
 
             IMapper httpToJson = JSON.General.CreateMapper();
             IMapper jsonToSql = SQL.General.CreateMapper();
@@ -77,16 +79,14 @@ namespace live.SARSCoV2
             var srcJsonToSql = jsonToSql.Map<Dataset.Json.General, Dataset.Sql.General>(srcHttpToJson);
 
             Sql.Insert(new Query<Dataset.Sql.General>(srcJsonToSql), "general");
-
-            await Sql.DisconnectAsync();
         }
         public async void TaskCountry()
         {
-            await Country.GetAsync();
+            List<Country> country = await Country.GetAsync();
         }
         public async void TaskHistorical()
         {
-            await Historical.GetAsync();
+            List<Historical> historical = await Historical.GetAsync();
         }
 
         public void PrintAppInfo()
@@ -105,11 +105,14 @@ namespace live.SARSCoV2
     {
         #region Methods
 
-        public SqlAdapterOfSARSCoV2() : base(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE) => Expression.Empty();
+        public SqlAdapterOfSARSCoV2(string server, string username, string password, string database)
+            : base(server, username, password, database) => Expression.Empty();
 
-        public override void Delete<T>(Query<T> file, string tableName) => Expression.Empty();
         public override void Insert<T>(Query<T> file, string tableName)
         {
+            // call first base
+            base.Insert(file, tableName);
+
             var template = @"INSERT INTO {0}({1}) VALUES({2})";
             var properties = file.GetProperties();
 
@@ -124,8 +127,6 @@ namespace live.SARSCoV2
 
             command.ExecuteNonQuery();
         }
-        public override List<T> Select<T>(Query<T> file, string tableName) => default;
-        public override void Update<T>(Query<T> file, string tableName) => Expression.Empty();
 
         #endregion
     }

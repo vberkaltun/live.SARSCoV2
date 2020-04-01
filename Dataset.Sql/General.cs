@@ -2,7 +2,7 @@
 {
     struct General
     {
-        public string Updated { get; }
-        public string Content { get; }
+        public string Updated { get; set; }
+        public string Content { get; set; }
     }
 }

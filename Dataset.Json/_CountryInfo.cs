@@ -1,12 +1,12 @@
 ﻿namespace live.SARSCoV2.Dataset.Json
 {
-    class CountryInfo
+    struct CountryInfo
     {
-        public string Domain { get; }
-        public string Province { get; }
-        public string ISO2 { get; }
-        public string ISO3 { get; }
-        public double Latitude { get; }
-        public double Longitude { get; }
+        public string Domain { get; set; }
+        public string Province { get; set; }
+        public string ISO2 { get; set; }
+        public string ISO3 { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }

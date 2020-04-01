@@ -2,12 +2,12 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    class Coordinates
+    struct Coordinates
     {
         [JsonProperty(PropertyName = "latitude")]
-        public double Latitude { get; }
+        public double Latitude { get; set; }
 
         [JsonProperty(PropertyName = "longitude")]
-        public double Longitude { get; }
+        public double Longitude { get; set; }
     }
 }

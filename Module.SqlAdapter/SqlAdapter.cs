@@ -6,7 +6,7 @@ using live.SARSCoV2.Module.SqlQuery;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {
-    abstract class SqlAdapter : BaseMember, ISqlAdapter
+    class SqlAdapter : BaseMember, ISqlAdapter
     {
         #region Properties
 
@@ -54,10 +54,28 @@ namespace live.SARSCoV2.Module.SqlAdapter
             IsConnected = false;
         }
 
-        public abstract void Insert<T>(Query<T> file, string tableName);
-        public abstract List<T> Select<T>(Query<T> file, string tableName);
-        public abstract void Update<T>(Query<T> file, string tableName);
-        public abstract void Delete<T>(Query<T> file, string tableName);
+        public virtual void Insert<T>(Query<T> file, string tableName)
+        {
+            // print message
+            Logger.Write(ClassName);
+        }
+        public virtual List<T> Select<T>(Query<T> file, string tableName)
+        {
+            // print message
+            Logger.Read(ClassName);
+
+            return default;
+        }
+        public virtual void Update<T>(Query<T> file, string tableName)
+        {
+            // print message
+            Logger.Write(ClassName);
+        }
+        public virtual void Delete<T>(Query<T> file, string tableName)
+        {
+            // print message
+            Logger.Write(ClassName);
+        }
 
         public string GetConnectionString() => string.Format(@"server={0}; uid={1}; pwd={2}; database={3}", Server, Username, Password, Database);
 
