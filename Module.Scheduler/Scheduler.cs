@@ -1,11 +1,10 @@
 ﻿using System;
 using FluentScheduler;
 using live.SARSCoV2.Module.Base;
-using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.Scheduler
 {
-    class Scheduler : Logger, IScheduler
+    class Scheduler : Base.Base, IScheduler
     {
         #region Properties
 
@@ -25,10 +24,10 @@ namespace live.SARSCoV2.Module.Scheduler
 
         #region Methods
 
-        public Scheduler(Action executed = null, int interval = SCHEDULED_JOB_INTERVAL, bool autostart = true)
+        public Scheduler(Action executed, int interval, bool autostart = true)
         {
             // print message
-            PrintMessage(ClassName, JobType.Initialize);
+            Logger.Initialize(ClassName);
 
             Interval = interval;
             Executed = executed;
@@ -41,7 +40,7 @@ namespace live.SARSCoV2.Module.Scheduler
         public void Schedule()
         {
             // print message
-            PrintMessage(ClassName, JobType.Read);
+            Logger.Read(ClassName);
 
             // schedular
             Schedule(() => Executed?.Invoke()).WithName(ID.ToString()).NonReentrant().ToRunNow().AndEvery(Interval).Seconds();
@@ -49,7 +48,7 @@ namespace live.SARSCoV2.Module.Scheduler
         public void Terminate()
         {
             // print message
-            PrintMessage(ClassName, JobType.Error);
+            Logger.Error(ClassName);
 
             // remove task
             JobManager.RemoveJob(ID.ToString());

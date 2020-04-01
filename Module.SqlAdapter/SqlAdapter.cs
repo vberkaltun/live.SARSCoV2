@@ -1,17 +1,14 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using live.SARSCoV2.Module.Base;
 using live.SARSCoV2.Module.SqlQuery;
-using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {
-    class SqlAdapter : Logger, ISqlAdapter
+    abstract class SqlAdapter : Base.Base, ISqlAdapter
     {
         #region Properties
-        
-        public static string InsertTemplate => @"INSERT INTO {0}({1}) VALUES({2})";
 
         public static string ClassName => typeof(SqlAdapter).FullName;
 
@@ -27,11 +24,10 @@ namespace live.SARSCoV2.Module.SqlAdapter
 
         #region Methods
 
-        public SqlAdapter(string server = SQL_SERVER, string username = SQL_USERNAME,
-            string password = SQL_PASSWORD, string database = SQL_DATABASE)
+        public SqlAdapter(string server, string username, string password, string database)
         {
             // print message
-            PrintMessage(ClassName, JobType.Initialize);
+            Logger.Initialize(ClassName);
 
             Server = server;
             Username = username;
@@ -42,7 +38,7 @@ namespace live.SARSCoV2.Module.SqlAdapter
         public async Task ConnectAsync()
         {
             // print message
-            PrintMessage(ClassName, JobType.Succesfull);
+            Logger.Succesfull(ClassName);
 
             Connection = new MySqlConnection(GetConnectionString());
 
@@ -52,27 +48,16 @@ namespace live.SARSCoV2.Module.SqlAdapter
         public async Task DisconnectAsync()
         {
             // print message
-            PrintMessage(ClassName, JobType.Error);
+            Logger.Error(ClassName);
 
             await Connection.CloseAsync();
             IsConnected = false;
         }
 
-        public void Insert<T>(Query<T> file, string tableName)
-        {
-            var properties = file.GetProperties();
-
-            string target = string.Join(", ", properties.Keys.ToArray()).Trim();
-            string source = "@" + string.Join(", @", properties.Keys.ToArray()).Trim();
-
-            MySqlCommand command = new MySqlCommand(string.Format(InsertTemplate, tableName, target, source), Connection);
-            command.Prepare();
-
-            foreach (var item in properties)
-                command.Parameters.AddWithValue(string.Format("@{0}", item.Key), item.Value.ToString());
-
-            command.ExecuteNonQuery();
-        }
+        public abstract void Insert<T>(Query<T> file, string tableName);
+        public abstract List<T> Select<T>(Query<T> file, string tableName);
+        public abstract void Update<T>(Query<T> file, string tableName);
+        public abstract void Delete<T>(Query<T> file, string tableName);
 
         public string GetConnectionString() => string.Format(@"server={0}; uid={1}; pwd={2}; database={3}", Server, Username, Password, Database);
 

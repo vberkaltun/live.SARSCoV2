@@ -7,19 +7,22 @@ using live.SARSCoV2.Module.HttpRequest;
 using live.SARSCoV2.Module.Scheduler;
 using live.SARSCoV2.Module.SqlAdapter;
 using live.SARSCoV2.Module.SqlQuery;
+using Newtonsoft.Json;
 using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2
 {
-    class Program : Logger
+    class Program : Base
     {
         static void Main() => new SARSCoV2();
     }
 
-    class SARSCoV2 : Logger
+    class SARSCoV2 : Base
     {
-        HttpClient Client = new HttpClient();
-        SqlAdapter Sql = new SqlAdapter();
+        JsonSerializerSettings JsonSerializerSettings = new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING };
+
+        HttpClient Client;
+        SqlAdapterOfSARSCoV2 Sql;
 
         HttpRequest<General> General;
         HttpRequest<List<Country>> Country;
@@ -29,24 +32,24 @@ namespace live.SARSCoV2
         {
             // init variable
             Client = new HttpClient();
-            Sql = new SqlAdapter();
+            Sql = new SqlAdapterOfSARSCoV2();
 
-            General = new HttpRequest<General>(Client, @"https://corona.lmao.ninja/all");
-            Country = new HttpRequest<List<Country>>(Client, @"https://corona.lmao.ninja/v2/jhucsse");
-            Historical = new HttpRequest<List<Historical>>(Client, @"https://corona.lmao.ninja/v2/historical");
+            General = new HttpRequest<General>(Client, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
+            Country = new HttpRequest<List<Country>>(Client, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
+            Historical = new HttpRequest<List<Historical>>(Client, @"https://corona.lmao.ninja/v2/historical", JsonSerializerSettings);
 
             // init console
-            SetVisibleMessage();
+            Logger.SetVisibleMessage();
             PrintAppInfo();
 
             // init scheduler
-            JobManager.Initialize(new Scheduler(TaskGeneralAsync));
-            JobManager.Initialize(new Scheduler(TaskCountry));
-            JobManager.Initialize(new Scheduler(TaskHistorical));
+            JobManager.Initialize(new Scheduler(TaskGeneralAsync,10));
+            JobManager.Initialize(new Scheduler(TaskCountry, 10));
+            JobManager.Initialize(new Scheduler(TaskHistorical, 10));
 
             while (true)
             {
-                if (ReadChar() != EXIT_CODE)
+                if (Logger.ReadChar() != EXIT_CODE)
                     continue;
 
                 // stop the scheduler
@@ -77,13 +80,38 @@ namespace live.SARSCoV2
 
         public void PrintAppInfo()
         {
-            PrintMessage(string.Format("{0} {1}",
-                APP_NAME, APP_VERSION), JobType.Informational);
+            Logger.Informational(string.Format("{0} {1}",
+                APP_NAME, APP_VERSION));
 
-            PrintMessage(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
-                EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING), JobType.Informational);
+            Logger.Informational(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
+                EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING));
         }
 
         #endregion
+    }
+
+    class SqlAdapterOfSARSCoV2 : SqlAdapter
+    {
+        public SqlAdapterOfSARSCoV2() : base(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE) { }
+
+        public override void Delete<T>(Query<T> file, string tableName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void Insert<T>(Query<T> file, string tableName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override List<T> Select<T>(Query<T> file, string tableName)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void Update<T>(Query<T> file, string tableName)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

@@ -22,60 +22,122 @@ namespace live.SARSCoV2
 
         public class Automapper
         {
-            // initialize the mapper
-            public readonly MapperConfiguration General = new MapperConfiguration(cfg =>
+            public class JSON
             {
-                cfg.CreateMap<Dataset.Http.General, Dataset.Json.General>()
-                .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
+                // initialize the mapper
+                public readonly MapperConfiguration General = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Dataset.Http.General, Dataset.Json.General>()
+                    .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
 
-                .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Cases))
-                .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Deaths))
-                .ForMember(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Recovered));
-            });
+                    .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Cases))
+                    .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Deaths))
+                    .ForMember(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Recovered));
+                });
 
-            // initialize the mapper
-            public readonly MapperConfiguration CountryV2 = new MapperConfiguration(cfg =>
+                // initialize the mapper
+                public readonly MapperConfiguration CountryV2 = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Dataset.Http.Country, Dataset.Json.Country>()
+                    .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
+
+                    .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
+                    .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
+                    .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
+                    .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
+                    .ForMember(tar => tar.DomainInfo.Latitude, src => src.MapFrom(src => src.Coordinates.Latitude))
+                    .ForMember(tar => tar.DomainInfo.Longitude, src => src.MapFrom(src => src.Coordinates.Longitude))
+
+                    .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Statistics.Cases))
+                    .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Statistics.Deaths))
+                    .ForMember(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Statistics.Recovered));
+                });
+
+                // initialize the mapper
+                public readonly MapperConfiguration Historical = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Dataset.Http.Historical, Dataset.Json.Historical>()
+                    .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
+                    .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
+                    .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
+                    .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
+
+                    .ForMember(tar => tar.Timeline.Cases, src => src.MapFrom(src => src.Timeline.Cases))
+                    .ForMember(tar => tar.Timeline.Deaths, src => src.MapFrom(src => src.Timeline.Deaths))
+                    .ForMember(tar => tar.Timeline.Recovered, src => src.MapFrom(src => src.Timeline.Recovered));
+                });
+
+                private static Country GetCountryInfo(string country)
+                {
+                    var result1 = Country.List.FirstOrDefault(src => src.Name == country);
+                    var result2 = Country.List.FirstOrDefault(src => src.TwoLetterCode == country);
+                    var result3 = Country.List.FirstOrDefault(src => src.ThreeLetterCode == country);
+                    var result4 = Country.List.FirstOrDefault(src => src.NumericCode == country);
+
+                    return result1 != null ? result1 :
+                        (result2 != null ? result2 :
+                        (result3 != null ? result3 :
+                        (result4 != null ? result4 : null)));
+                }
+            }
+
+            public class SQL
             {
-                cfg.CreateMap<Dataset.Http.Country, Dataset.Json.Country>()
-                .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
+                // initialize the mapper
+                public readonly MapperConfiguration General = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Dataset.Http.General, Dataset.Json.General>()
+                    .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
 
-                .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
-                .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
-                .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
-                .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
-                .ForMember(tar => tar.DomainInfo.Latitude, src => src.MapFrom(src => src.Coordinates.Latitude))
-                .ForMember(tar => tar.DomainInfo.Longitude, src => src.MapFrom(src => src.Coordinates.Longitude))
+                    .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Cases))
+                    .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Deaths))
+                    .ForMember(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Recovered));
+                });
 
-                .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Statistics.Cases))
-                .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Statistics.Deaths))
-                .ForMember(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Statistics.Recovered));
-            });
+                // initialize the mapper
+                public readonly MapperConfiguration CountryV2 = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Dataset.Http.Country, Dataset.Json.Country>()
+                    .ForMember(tar => tar.Updated, src => src.MapFrom(src => src.Updated))
 
-            // initialize the mapper
-            public readonly MapperConfiguration Historical = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Dataset.Http.Historical, Dataset.Json.Historical>()
-                .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
-                .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
-                .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
-                .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
+                    .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
+                    .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
+                    .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
+                    .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
+                    .ForMember(tar => tar.DomainInfo.Latitude, src => src.MapFrom(src => src.Coordinates.Latitude))
+                    .ForMember(tar => tar.DomainInfo.Longitude, src => src.MapFrom(src => src.Coordinates.Longitude))
 
-                .ForMember(tar => tar.Timeline.Cases, src => src.MapFrom(src => src.Timeline.Cases))
-                .ForMember(tar => tar.Timeline.Deaths, src => src.MapFrom(src => src.Timeline.Deaths))
-                .ForMember(tar => tar.Timeline.Recovered, src => src.MapFrom(src => src.Timeline.Recovered));
-            });
+                    .ForMember(tar => tar.Statistics.Cases, src => src.MapFrom(src => src.Statistics.Cases))
+                    .ForMember(tar => tar.Statistics.Deaths, src => src.MapFrom(src => src.Statistics.Deaths))
+                    .ForMember(tar => tar.Statistics.Recovered, src => src.MapFrom(src => src.Statistics.Recovered));
+                });
 
-            private static Country GetCountryInfo(string country)
-            {
-                var result1 = Country.List.FirstOrDefault(src => src.Name == country);
-                var result2 = Country.List.FirstOrDefault(src => src.TwoLetterCode == country);
-                var result3 = Country.List.FirstOrDefault(src => src.ThreeLetterCode == country);
-                var result4 = Country.List.FirstOrDefault(src => src.NumericCode == country);
+                // initialize the mapper
+                public readonly MapperConfiguration Historical = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Dataset.Http.Historical, Dataset.Json.Historical>()
+                    .ForMember(tar => tar.DomainInfo.Domain, src => src.MapFrom(src => src.Domain))
+                    .ForMember(tar => tar.DomainInfo.Province, src => src.MapFrom(src => src.Province))
+                    .ForMember(tar => tar.DomainInfo.ISO2, src => src.MapFrom(src => GetCountryInfo(src.Domain).TwoLetterCode))
+                    .ForMember(tar => tar.DomainInfo.ISO3, src => src.MapFrom(src => GetCountryInfo(src.Domain).ThreeLetterCode))
 
-                return result1 != null ? result1 :
-                    (result2 != null ? result2 :
-                    (result3 != null ? result3 :
-                    (result4 != null ? result4 : null)));
+                    .ForMember(tar => tar.Timeline.Cases, src => src.MapFrom(src => src.Timeline.Cases))
+                    .ForMember(tar => tar.Timeline.Deaths, src => src.MapFrom(src => src.Timeline.Deaths))
+                    .ForMember(tar => tar.Timeline.Recovered, src => src.MapFrom(src => src.Timeline.Recovered));
+                });
+
+                private static Country GetCountryInfo(string country)
+                {
+                    var result1 = Country.List.FirstOrDefault(src => src.Name == country);
+                    var result2 = Country.List.FirstOrDefault(src => src.TwoLetterCode == country);
+                    var result3 = Country.List.FirstOrDefault(src => src.ThreeLetterCode == country);
+                    var result4 = Country.List.FirstOrDefault(src => src.NumericCode == country);
+
+                    return result1 != null ? result1 :
+                        (result2 != null ? result2 :
+                        (result3 != null ? result3 :
+                        (result4 != null ? result4 : null)));
+                }
             }
         }
     }

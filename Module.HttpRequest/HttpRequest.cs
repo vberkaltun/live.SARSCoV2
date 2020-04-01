@@ -2,11 +2,10 @@
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using live.SARSCoV2.Module.Base;
-using static live.SARSCoV2.Global;
 
 namespace live.SARSCoV2.Module.HttpRequest
 {
-    class HttpRequest<T> : Logger, IHttpRequest<T>
+    class HttpRequest<T> : Base.Base, IHttpRequest<T>
     {
         #region Properties
 
@@ -14,24 +13,26 @@ namespace live.SARSCoV2.Module.HttpRequest
 
         public HttpClient Client { get; private set; }
         public string Path { get; private set; }
+        public JsonSerializerSettings SerializerSettings { get; private set; }
 
         #endregion
 
         #region Methods
 
-        public HttpRequest(HttpClient client = null, string path = null)
+        public HttpRequest(HttpClient client, string path, JsonSerializerSettings serializerSettings)
         {
             // print message
-            PrintMessage(ClassName, JobType.Initialize);
+            Logger.Initialize(ClassName);
 
             Client = client;
             Path = path;
+            SerializerSettings = serializerSettings;
         }
 
         public async Task<T> GetAsync()
         {
             // print message
-            PrintMessage(ClassName, JobType.Read);
+            Logger.Read(ClassName);
 
             // read data
             var response = await Client.GetAsync(Path);
@@ -39,7 +40,7 @@ namespace live.SARSCoV2.Module.HttpRequest
             var responseBody = await response.Content.ReadAsStringAsync();
 
             // parse and return, do not 
-            return JsonConvert.DeserializeObject<T>(responseBody, new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING });
+            return JsonConvert.DeserializeObject<T>(responseBody, SerializerSettings);
         }
 
         #endregion

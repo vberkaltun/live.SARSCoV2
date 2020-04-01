@@ -10,7 +10,6 @@ namespace live.SARSCoV2.Module.SqlQuery
         public static string ClassName => typeof(T).FullName;
 
         private T File { get; set; }
-
         private Dictionary<string, object> Properties { get; set; }
 
         #endregion
@@ -23,6 +22,7 @@ namespace live.SARSCoV2.Module.SqlQuery
             Properties = new Dictionary<string, object>();
         }
 
+        public T GetFile() => File;
         public Dictionary<string, object> GetProperties()
         {
             var source = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
@@ -32,7 +32,6 @@ namespace live.SARSCoV2.Module.SqlQuery
 
             return Properties;
         }
-        public T GetFile() => File;
 
         #endregion
     }

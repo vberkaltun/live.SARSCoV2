@@ -1,9 +1,8 @@
-﻿using FluentScheduler;
-using System;
+﻿using System;
 
 namespace live.SARSCoV2.Module.Base
 {
-    class Logger : Registry, ILogger
+    class Logger : ILogger
     {
         #region Properties
 
@@ -12,72 +11,33 @@ namespace live.SARSCoV2.Module.Base
         private static bool IsVisibleMessage = false;
         private static object Chainlock = new object();
 
-        public enum JobType
-        {
-            General, Informational, Initialize,
-            Read, Write,
-            Error, Succesfull,
-        }
-
         #endregion
 
         #region Methods
 
-        public void PrintMessage(string message, JobType type)
+        public void General(string message, bool newLine = true) => Print(message, newLine);
+        public void Informational(string message, bool newLine = true) => Print(message, ConsoleColor.Blue, newLine);
+        public void Initialize(string message, bool newLine = true) => Print(string.Format("TASK_INT:{0}", message), ConsoleColor.Yellow, newLine);
+        public void Read(string message, bool newLine = true) => Print(string.Format("HTTP_REA:{0}", message), ConsoleColor.DarkMagenta, newLine);
+        public void Write(string message, bool newLine = true) => Print(string.Format("TASK_WRI:{0}", message), ConsoleColor.Magenta, newLine);
+        public void Error(string message, bool newLine = true) => Print(string.Format("TASK_ERR:{0}", message), ConsoleColor.Red, newLine);
+        public void Succesfull(string message, bool newLine = true) => Print(string.Format("TASK_SUC:{0}", message), ConsoleColor.Green, newLine);
+
+        public void Print(string message, ConsoleColor color, bool newLine = true)
         {
             lock (Chainlock)
             {
-                // print date and time
-                PrintMessage(string.Format("{0}<{1}>: ", DateTime.Now.ToString("yyyy/MM/dd-h:mm:ss"), Domain), false);
-
-                switch (type)
-                {
-                    default:
-                    case JobType.General:
-                        PrintMessage(message);
-                        break;
-
-                    case JobType.Informational:
-                        PrintMessage(message, ConsoleColor.Blue);
-                        break;
-
-                    case JobType.Initialize:
-                        PrintMessage(string.Format("TASK_INT:{0}", message), ConsoleColor.Yellow);
-                        break;
-
-                    case JobType.Read:
-                        PrintMessage(string.Format("HTTP_REA:{0}", message), ConsoleColor.DarkMagenta);
-                        break;
-
-                    case JobType.Write:
-                        PrintMessage(string.Format("TASK_WRI:{0}", message), ConsoleColor.Magenta);
-                        break;
-
-                    case JobType.Error:
-                        PrintMessage(string.Format("TASK_ERR:{0}", message), ConsoleColor.Red);
-                        break;
-
-                    case JobType.Succesfull:
-                        PrintMessage(string.Format("TASK_SUC:{0}", message), ConsoleColor.Green);
-                        break;
-                }
+                Console.ForegroundColor = color;
+                Print(string.Format("{0}<{1}>: <2>", DateTime.Now.ToString("yyyy/MM/dd-h:mm:ss"), Domain, message), newLine);
+                Console.ResetColor();
             }
         }
-        public void PrintMessage(string message, ConsoleColor color, bool newLine = true)
-        {
-            Console.ForegroundColor = color;
-            PrintMessage(message, newLine);
-            Console.ResetColor();
-        }
-        public void PrintMessage(string message, bool newLine = true)
+        public void Print(string message, bool newLine = true)
         {
             if (!IsVisibleMessage)
                 return;
 
-            if (newLine)
-                Console.WriteLine("{0}", message);
-            else
-                Console.Write("{0}", message);
+            Console.Write("{0}{1}", message, newLine ? "\n" : null);
         }
 
         public string ReadMessage() => Console.ReadLine();
