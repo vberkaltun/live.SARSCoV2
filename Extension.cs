@@ -29,7 +29,7 @@ namespace live.SARSCoV2
                     Domain = var.Domain,
                     Province = var.Province,
                     ISO2 = ISO.TwoLetterCode,
-                    ISO3 = ISO.TwoLetterCode,
+                    ISO3 = ISO.ThreeLetterCode,
                 },
                 Coordinates = new Json.Coordinates
                 {
@@ -71,7 +71,7 @@ namespace live.SARSCoV2
                     Domain = var.Domain,
                     Province = var.Province,
                     ISO2 = ISO.TwoLetterCode,
-                    ISO3 = ISO.TwoLetterCode
+                    ISO3 = ISO.ThreeLetterCode
                 },
                 Timeline = new Json.Timeline
                 {
@@ -147,9 +147,17 @@ namespace live.SARSCoV2
         public static string FixCountryNames(string country)
         {
             // add all name hot fix to here 
-            country = country.Replace("Burma", "Myanmar");
-            country = country.Replace("Côte d'Ivoire", "384");
-            country = country.Replace("Cote d'Ivoire", "384");
+            country = country.Replace("Burma", "MMR");
+            country = country.Replace("Côte d'Ivoire", "CIV");
+            country = country.Replace("Cote d'Ivoire", "CIV");
+            country = country.Replace("Korea, South", "KOR");
+            country = country.Replace("S. Korea", "KOR");
+            country = country.Replace("Laos", "LAO");
+            country = country.Replace("Taiwan*", "TWN");
+            country = country.Replace("Vietnam", "VNM");
+            country = country.Replace("Libyan Arab Jamahiriya", "LBY");
+            country = country.Replace("UAE", "ARE");
+            country = country.Replace("Swaziland", "SWZ");
 
             return country;
         }
