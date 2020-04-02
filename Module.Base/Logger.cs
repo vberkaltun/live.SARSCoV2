@@ -18,8 +18,8 @@ namespace live.SARSCoV2.Module.Base
         public void General(string message, bool newLine = true) => Print(message, newLine);
         public void Informational(string message, bool newLine = true) => Print(message, ConsoleColor.Blue, newLine);
         public void Initialize(string message, bool newLine = true) => Print(string.Format("Initialize: {0}", message), ConsoleColor.Yellow, newLine);
-        public void Read(string message, bool newLine = true) => Print(string.Format("Read: {0}", message), ConsoleColor.Magenta, newLine);
-        public void Write(string message, bool newLine = true) => Print(string.Format("Write: {0}", message), ConsoleColor.DarkMagenta, newLine);
+        public void Read(string message, bool newLine = true) => Print(string.Format("Read: {0}", message), ConsoleColor.DarkMagenta, newLine);
+        public void Write(string message, bool newLine = true) => Print(string.Format("Write: {0}", message), ConsoleColor.Magenta, newLine);
         public void Error(string message, bool newLine = true) => Print(string.Format("Error: {0}", message), ConsoleColor.Red, newLine);
         public void Succesfull(string message, bool newLine = true) => Print(string.Format("Succesfull: {0}", message), ConsoleColor.Green, newLine);
         public void Connect(string message, bool newLine = true) => Print(string.Format("Connect: {0}", message), ConsoleColor.Green, newLine);

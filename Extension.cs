@@ -18,7 +18,7 @@ namespace live.SARSCoV2
     {
         #region Converter JSON
 
-        public static Json.Country ToJson(this Http.Province var)
+        public static Json.Country ToJson(this Http.Country var)
         {
             var ISO = GetCountryInfo(var.Domain);
 
@@ -86,6 +86,30 @@ namespace live.SARSCoV2
                 }
             };
         }
+        public static Json.States ToJson(this Http.States var)
+        {
+            var ISO = GetCountryInfo("USA");
+
+            if (ISO == null)
+                return null;
+
+            return new Json.States
+            {
+                Updated = DateTime.UtcNow.ToUnixTime().ToString(),
+                DomainInfo = new Json.CountryInfo
+                {
+                    Domain = ISO.Name,
+                    Province = var.State,
+                    ISO2 = ISO.TwoLetterCode,
+                    ISO3 = ISO.ThreeLetterCode
+                },
+                Statistics = new Json.Statistics
+                {
+                    Cases = var.Cases,
+                    Deaths = var.Deaths,
+                }
+            };
+        }
 
         #endregion
 
@@ -123,6 +147,21 @@ namespace live.SARSCoV2
             var.Updated = null;
 
             return new Sql.Historical
+            {
+                Updated = updated,
+                Domain = var.DomainInfo.Domain,
+                DomainISO2 = var.DomainInfo.ISO2,
+                DomainISO3 = var.DomainInfo.ISO3,
+                Province = var.DomainInfo.Province,
+                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+            };
+        }
+        public static Sql.States ToSql(this Json.States var)
+        {
+            string updated = var.Updated.ToString();
+            var.Updated = null;
+
+            return new Sql.States
             {
                 Updated = updated,
                 Domain = var.DomainInfo.Domain,
@@ -219,14 +258,16 @@ namespace live.SARSCoV2
             => new Property<Sql.General>(item).GetProperties();
         private static Dictionary<string, object> GetProperties(Sql.Historical item)
             => new Property<Sql.Historical>(item).GetProperties();
+        private static Dictionary<string, object> GetProperties(Sql.States item)
+            => new Property<Sql.States>(item).GetProperties();
 
         public static void Insert(this SqlAdapter sqlClient, Sql.General file, string tableName, string comparer)
             => Insert(sqlClient, GetProperties(file), tableName, comparer);
-
         public static void Insert(this SqlAdapter sqlClient, Sql.Country file, string tableName, string comparer)
             => Insert(sqlClient, GetProperties(file), tableName, comparer);
-
         public static void Insert(this SqlAdapter sqlClient, Sql.Historical file, string tableName, string comparer)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer);
+        public static void Insert(this SqlAdapter sqlClient, Sql.States file, string tableName, string comparer)
             => Insert(sqlClient, GetProperties(file), tableName, comparer);
 
         private static void Insert(this SqlAdapter sqlClient, Dictionary<string, object> keyValuePairs, string tableName, string whereNotExists)

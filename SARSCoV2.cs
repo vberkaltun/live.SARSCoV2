@@ -44,8 +44,9 @@ namespace live.SARSCoV2
         private HttpClient HttpClient;
 
         private HttpRequest<Http.General> General;
-        private HttpRequest<List<Http.Province>> Country;
+        private HttpRequest<List<Http.Country>> Country;
         private HttpRequest<List<Http.Historical>> Historical;
+        private HttpRequest<List<Http.States>> States;
 
         #endregion
 
@@ -68,6 +69,10 @@ namespace live.SARSCoV2
 
         private void Init()
         {
+            // init console
+            Logger.SetVisibleMessage();
+            PrintAppInfo();
+
             // init variable
             JsonSerializerSettings = new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING };
             SqlClient = new SqlAdapter(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
@@ -75,17 +80,15 @@ namespace live.SARSCoV2
 
             // init request
             General = new HttpRequest<Http.General>(HttpClient, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
-            Country = new HttpRequest<List<Http.Province>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
+            Country = new HttpRequest<List<Http.Country>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
             Historical = new HttpRequest<List<Http.Historical>>(HttpClient, @"https://corona.lmao.ninja/v2/historical", JsonSerializerSettings);
-
-            // init console
-            Logger.SetVisibleMessage();
-            PrintAppInfo();
+            States = new HttpRequest<List<Http.States>>(HttpClient, @"https://corona.lmao.ninja/states", JsonSerializerSettings);
 
             // init scheduler
             JobManager.Initialize(new Scheduler(TaskGeneral, SCHEDULED_JOB_INTERVAL));
             JobManager.Initialize(new Scheduler(TaskCountry, SCHEDULED_JOB_INTERVAL));
             JobManager.Initialize(new Scheduler(TaskHistorical, SCHEDULED_JOB_INTERVAL));
+            JobManager.Initialize(new Scheduler(TaskStates, SCHEDULED_JOB_INTERVAL));
         }
 
         private async void TaskGeneral()
@@ -94,10 +97,15 @@ namespace live.SARSCoV2
             await SqlClient.ConnectAsync();
 
             Http.General general = await General.GetAsync();
-            SqlClient.Insert(general.ToJson().ToSql(), "general", "Content");
+            var result = general.ToJson()?.ToSql();
 
-            // shoe general status
-            Logger.Write("[General] General info successfully processed!");
+            if (result != null)
+            {
+                SqlClient.Insert(result, "general", "Content");
+
+                // show general status
+                Logger.Write("[General] General info successfully processed!");
+            }
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -108,22 +116,24 @@ namespace live.SARSCoV2
             await SqlClient.ConnectAsync();
 
             int errorCount = 0;
-            List<Http.Province> country = await Country.GetAsync();
+            List<Http.Country> country = await Country.GetAsync();
             foreach (var item in country)
             {
                 var result = item.ToJson()?.ToSql();
 
                 if (result == null)
                 {
-                    Logger.Error(string.Format("[Country] <{0}><{1}> info can not found!", item.Domain, item));
+                    // show error status
+                    Logger.Error(string.Format("[Historical] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+
                     errorCount++;
                     continue;
                 }
 
-                SqlClient.Insert(item.ToJson().ToSql(), "country", "Content");
+                SqlClient.Insert(result, "country", "Content");
             }
 
-            // shoe general status
+            // show general status
             Logger.Write(string.Format("[Country] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
 
             await SqlClient.DisconnectAsync();
@@ -142,17 +152,48 @@ namespace live.SARSCoV2
 
                 if (result == null)
                 {
-                    Logger.Error(string.Format("[Historical] <{0}><{1}> info can not found!", item.Domain, item));
+                    // show error status
+                    Logger.Error(string.Format("[Historical] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+
                     errorCount++;
                     continue;
                 }
 
-                SqlClient.Insert(item.ToJson().ToSql(), "historical", "Content");
-                SqlClient.Update(item.ToJson().ToSql(), "historical");
+                SqlClient.Insert(result, "historical", "Content");
+                SqlClient.Update(result, "historical");
             }
 
-            // shoe general status
+            // show general status
             Logger.Write(string.Format("[Historical] Total {0}/{1} info successfully processed!", historical.Count - errorCount, historical.Count));
+
+            await SqlClient.DisconnectAsync();
+            Semaphore.Release();
+        }
+        private async void TaskStates()
+        {
+            await Semaphore.WaitAsync();
+            await SqlClient.ConnectAsync();
+
+            int errorCount = 0;
+            List<Http.States> states = await States.GetAsync();
+            foreach (var item in states)
+            {
+                var result = item.ToJson()?.ToSql();
+
+                if (result == null)
+                {
+                    // show error status
+                    Logger.Error(string.Format("[States] <{0}><{1}> info can not add to database, there is no match!", item.State, item));
+
+                    errorCount++;
+                    continue;
+                }
+
+                SqlClient.Insert(result, "states", "Content");
+            }
+
+            // show general status
+            Logger.Write(string.Format("[States] Total {0}/{1} info successfully processed!", states.Count - errorCount, states.Count));
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
