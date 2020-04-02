@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using live.SARSCoV2.Module.Base;
-using live.SARSCoV2.Module.SqlQuery;
+using live.SARSCoV2.Module.Property;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {
@@ -58,29 +58,6 @@ namespace live.SARSCoV2.Module.SqlAdapter
 
             await Connection.CloseAsync();
             IsConnected = false;
-        }
-
-        public virtual void Insert<T>(Query<T> file, string tableName)
-        {
-            // print message
-            Logger.Write(ClassName);
-        }
-        public virtual List<T> Select<T>(Query<T> file, string tableName)
-        {
-            // print message
-            Logger.Read(ClassName);
-
-            return default;
-        }
-        public virtual void Update<T>(Query<T> file, string tableName)
-        {
-            // print message
-            Logger.Write(ClassName);
-        }
-        public virtual void Delete<T>(Query<T> file, string tableName)
-        {
-            // print message
-            Logger.Write(ClassName);
         }
 
         public string GetConnectionString() => string.Format(@"server={0}; uid={1}; pwd={2}; database={3}", Server, Username, Password, Database);

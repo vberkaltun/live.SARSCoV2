@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
-using live.SARSCoV2.Module.SqlQuery;
+using live.SARSCoV2.Module.Property;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {
@@ -17,11 +17,6 @@ namespace live.SARSCoV2.Module.SqlAdapter
 
         Task ConnectAsync();
         Task DisconnectAsync();
-
-        void Insert<T>(Query<T> file, string tableName);
-        List<T> Select<T>(Query<T> file, string tableName);
-        void Update<T>(Query<T> file, string tableName);
-        void Delete<T>(Query<T> file, string tableName);
 
         string GetConnectionString();
     }

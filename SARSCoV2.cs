@@ -4,18 +4,15 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using FluentScheduler;
 using live.SARSCoV2.Module.Base;
 using live.SARSCoV2.Module.HttpRequest;
 using live.SARSCoV2.Module.Scheduler;
 using live.SARSCoV2.Module.SqlAdapter;
-using live.SARSCoV2.Module.SqlQuery;
+using live.SARSCoV2.Module.Property;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
-using CountryISO = ISO3166.Country;
 using Http = live.SARSCoV2.Dataset.Http;
-using Json = live.SARSCoV2.Dataset.Json;
 using Sql = live.SARSCoV2.Dataset.Sql;
 
 namespace live.SARSCoV2
@@ -43,11 +40,11 @@ namespace live.SARSCoV2
         public static SemaphoreSlim Semaphore = new SemaphoreSlim(1, 1);
 
         private JsonSerializerSettings JsonSerializerSettings;
-        private ISqlAdapter SqlClient;
+        private SqlAdapter SqlClient;
         private HttpClient HttpClient;
 
         private HttpRequest<Http.General> General;
-        private HttpRequest<List<Http.Country>> Country;
+        private HttpRequest<List<Http.Province>> Country;
         private HttpRequest<List<Http.Historical>> Historical;
 
         #endregion
@@ -73,12 +70,12 @@ namespace live.SARSCoV2
         {
             // init variable
             JsonSerializerSettings = new JsonSerializerSettings { NullValueHandling = NULL_VALUE_HANDLING };
-            SqlClient = new SqlAdapterOfSARSCoV2(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
+            SqlClient = new SqlAdapter(SQL_SERVER, SQL_USERNAME, SQL_PASSWORD, SQL_DATABASE);
             HttpClient = new HttpClient();
 
             // init request
             General = new HttpRequest<Http.General>(HttpClient, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
-            Country = new HttpRequest<List<Http.Country>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
+            Country = new HttpRequest<List<Http.Province>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
             Historical = new HttpRequest<List<Http.Historical>>(HttpClient, @"https://corona.lmao.ninja/v2/historical", JsonSerializerSettings);
 
             // init console
@@ -86,18 +83,21 @@ namespace live.SARSCoV2
             PrintAppInfo();
 
             // init scheduler
-            JobManager.Initialize(new Scheduler(TaskGeneralAsync, 10));
-            JobManager.Initialize(new Scheduler(TaskCountry, 10));
-            JobManager.Initialize(new Scheduler(TaskHistorical, 10));
+            JobManager.Initialize(new Scheduler(TaskGeneral, SCHEDULED_JOB_INTERVAL));
+            JobManager.Initialize(new Scheduler(TaskCountry, SCHEDULED_JOB_INTERVAL));
+            JobManager.Initialize(new Scheduler(TaskHistorical, SCHEDULED_JOB_INTERVAL));
         }
 
-        private async void TaskGeneralAsync()
+        private async void TaskGeneral()
         {
             await Semaphore.WaitAsync();
             await SqlClient.ConnectAsync();
 
             Http.General general = await General.GetAsync();
-            SqlClient.Insert(new Query<Sql.General>(general.ToJson().ToSql()), "general");
+            SqlClient.Insert(general.ToJson().ToSql(), "general", "Content");
+
+            // shoe general status
+            Logger.Write("[General] General info successfully processed!");
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -108,23 +108,23 @@ namespace live.SARSCoV2
             await SqlClient.ConnectAsync();
 
             int errorCount = 0;
-            List<Http.Country> country = await Country.GetAsync();
+            List<Http.Province> country = await Country.GetAsync();
             foreach (var item in country)
             {
                 var result = item.ToJson()?.ToSql();
 
                 if (result == null)
                 {
-                    Logger.Error(string.Format("Country<{0}><{1}> info can not found!", item.Domain, item));
+                    Logger.Error(string.Format("[Country] <{0}><{1}> info can not found!", item.Domain, item));
                     errorCount++;
                     continue;
                 }
 
-                SqlClient.Insert(new Query<Sql.Country>(result), "country");
+                SqlClient.Insert(item.ToJson().ToSql(), "country", "Content");
             }
 
             // shoe general status
-            Logger.Write(string.Format("Total {0}/{1} country info succesfull processed!", country.Count - errorCount, country.Count));
+            Logger.Write(string.Format("[Country] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -142,16 +142,17 @@ namespace live.SARSCoV2
 
                 if (result == null)
                 {
-                    Logger.Error(string.Format("Country<{0}><{1}> info can not found!", item.Domain, item));
+                    Logger.Error(string.Format("[Historical] <{0}><{1}> info can not found!", item.Domain, item));
                     errorCount++;
                     continue;
                 }
-                
-                SqlClient.Insert(new Query<Sql.Historical>(result), "historical");
+
+                SqlClient.Insert(item.ToJson().ToSql(), "historical", "Content");
+                SqlClient.Update(item.ToJson().ToSql(), "historical");
             }
 
             // shoe general status
-            Logger.Write(string.Format("Total {0}/{1} country info succesfull processed!", historical.Count - errorCount, historical.Count));
+            Logger.Write(string.Format("[Historical] Total {0}/{1} info successfully processed!", historical.Count - errorCount, historical.Count));
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -164,33 +165,6 @@ namespace live.SARSCoV2
 
             Logger.Informational(string.Format("Exit code: {0}, Interval: {1}, Null Value Handling: {2}",
                 EXIT_CODE, SCHEDULED_JOB_INTERVAL, NULL_VALUE_HANDLING));
-        }
-
-        #endregion
-    }
-
-    class SqlAdapterOfSARSCoV2 : SqlAdapter
-    {
-        #region Methods
-
-        public SqlAdapterOfSARSCoV2(string server, string username, string password, string database)
-            : base(server, username, password, database) => Expression.Empty();
-
-        public override void Insert<T>(Query<T> file, string tableName)
-        {
-            var template = @"INSERT INTO {0}({1}) VALUES({2})";
-            var properties = file.GetProperties();
-
-            string target = string.Join(", ", properties.Keys.ToArray()).Trim();
-            string source = "@" + string.Join(", @", properties.Keys.ToArray()).Trim();
-
-            MySqlCommand command = new MySqlCommand(string.Format(template, tableName, target, source), Connection);
-            command.Prepare();
-
-            foreach (var item in properties)
-                command.Parameters.AddWithValue(string.Format("@{0}", item.Key), item.Value);
-
-            command.ExecuteNonQuery();
         }
 
         #endregion

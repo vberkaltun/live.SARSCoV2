@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 
-namespace live.SARSCoV2.Module.SqlQuery
+namespace live.SARSCoV2.Module.Property
 {
-    class Query<T> : IQuery<T>
+    class Property<T> : IProperty<T>
     {
         #region Properties
 
@@ -16,7 +16,7 @@ namespace live.SARSCoV2.Module.SqlQuery
 
         #region Methods
 
-        public Query(T file)
+        public Property(T file)
         {
             File = file;
             Properties = new Dictionary<string, object>();
@@ -25,9 +25,10 @@ namespace live.SARSCoV2.Module.SqlQuery
         public T GetFile() => File;
         public Dictionary<string, object> GetProperties()
         {
-            var source = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            // clear first
+            Properties.Clear();
 
-            foreach (var item in source)
+            foreach (var item in typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance))
                 Properties.Add(item.Name, File.GetType().GetProperty(item.Name).GetValue(File, null));
 
             return Properties;

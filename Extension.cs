@@ -1,12 +1,16 @@
-﻿using System.Linq;
-using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Text;
 using CountryISO = ISO3166.Country;
+using Newtonsoft.Json;
+using MySql.Data.MySqlClient;
+using live.SARSCoV2.Module.Property;
+using live.SARSCoV2.Module.SqlAdapter;
 using Json = live.SARSCoV2.Dataset.Json;
 using Http = live.SARSCoV2.Dataset.Http;
 using Sql = live.SARSCoV2.Dataset.Sql;
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace live.SARSCoV2
 {
@@ -14,7 +18,7 @@ namespace live.SARSCoV2
     {
         #region Converter JSON
 
-        public static Json.Country ToJson(this Http.Country var)
+        public static Json.Country ToJson(this Http.Province var)
         {
             var ISO = GetCountryInfo(var.Domain);
 
@@ -23,11 +27,11 @@ namespace live.SARSCoV2
 
             return new Json.Country
             {
-                Updated = DateTime.Parse(var.Updated).ToUnixTime(),
+                Updated = DateTime.Parse(var.Updated).ToUnixTime().ToString(),
                 DomainInfo = new Json.CountryInfo
                 {
-                    Domain = var.Domain,
-                    Province = var.Province,
+                    Domain = ISO.Name,
+                    Province = var.City,
                     ISO2 = ISO.TwoLetterCode,
                     ISO3 = ISO.ThreeLetterCode,
                 },
@@ -48,7 +52,7 @@ namespace live.SARSCoV2
         {
             return new Json.General
             {
-                Updated = var.Updated,
+                Updated = var.Updated.ToString(),
                 Statistics = new Json.Statistics
                 {
                     Cases = var.Cases,
@@ -66,9 +70,10 @@ namespace live.SARSCoV2
 
             return new Json.Historical
             {
+                Updated = DateTime.UtcNow.ToUnixTime().ToString(),
                 DomainInfo = new Json.CountryInfo
                 {
-                    Domain = var.Domain,
+                    Domain = ISO.Name,
                     Province = var.Province,
                     ISO2 = ISO.TwoLetterCode,
                     ISO3 = ISO.ThreeLetterCode
@@ -88,33 +93,43 @@ namespace live.SARSCoV2
 
         public static Sql.Country ToSql(this Json.Country var)
         {
+            string updated = var.Updated.ToString();
+            var.Updated = null;
+
             return new Sql.Country
             {
-                Updated = var.Updated,
+                Updated = string.Format("{0}.{1}", var.DomainInfo.ISO3, updated),
                 Domain = var.DomainInfo.Domain,
                 Province = var.DomainInfo.Province,
                 DomainISO2 = var.DomainInfo.ISO2,
                 DomainISO3 = var.DomainInfo.ISO3,
-                Content = JsonConvert.SerializeObject(var)
+                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
             };
         }
         public static Sql.General ToSql(this Json.General var)
         {
+            string updated = var.Updated.ToString();
+            var.Updated = null;
+
             return new Sql.General
             {
-                Updated = var.Updated,
-                Content = JsonConvert.SerializeObject(var)
+                Updated = updated,
+                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
             };
         }
         public static Sql.Historical ToSql(this Json.Historical var)
         {
+            string updated = var.Updated.ToString();
+            var.Updated = null;
+
             return new Sql.Historical
             {
+                Updated = updated,
                 Domain = var.DomainInfo.Domain,
                 DomainISO2 = var.DomainInfo.ISO2,
                 DomainISO3 = var.DomainInfo.ISO3,
                 Province = var.DomainInfo.Province,
-                Content = JsonConvert.SerializeObject(var)
+                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
             };
         }
 
@@ -181,6 +196,68 @@ namespace live.SARSCoV2
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             return Convert.ToInt64((date - epoch).TotalSeconds);
+        }
+        public static string ToHexString(this byte[] array)
+        {
+            StringBuilder hex = new StringBuilder(array.Length * 2);
+            foreach (byte index in array)
+                hex.AppendFormat("{0:x2}", index);
+
+            return hex.ToString();
+        }
+
+        #endregion
+    }
+
+    static class SqlCommand
+    {
+        #region Insert
+
+        private static Dictionary<string, object> GetProperties(Sql.Country item)
+            => new Property<Sql.Country>(item).GetProperties();
+        private static Dictionary<string, object> GetProperties(Sql.General item)
+            => new Property<Sql.General>(item).GetProperties();
+        private static Dictionary<string, object> GetProperties(Sql.Historical item)
+            => new Property<Sql.Historical>(item).GetProperties();
+
+        public static void Insert(this SqlAdapter sqlClient, Sql.General file, string tableName, string comparer)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer);
+
+        public static void Insert(this SqlAdapter sqlClient, Sql.Country file, string tableName, string comparer)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer);
+
+        public static void Insert(this SqlAdapter sqlClient, Sql.Historical file, string tableName, string comparer)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer);
+
+        private static void Insert(this SqlAdapter sqlClient, Dictionary<string, object> keyValuePairs, string tableName, string whereNotExists)
+        {
+            var template = @"INSERT INTO " + tableName + @"({0}) select {1} " +
+                @"WHERE NOT EXISTS (Select " + whereNotExists + @" From " + tableName + @" where " + whereNotExists + @" = @" + whereNotExists + @")";
+
+            string target = string.Join(", ", keyValuePairs.Keys.ToArray()).Trim();
+            string source = "@" + string.Join(", @", keyValuePairs.Keys.ToArray()).Trim();
+
+            MySqlCommand command = new MySqlCommand(string.Format(template, target, source), sqlClient.Connection);
+            command.Prepare();
+
+            foreach (var item in keyValuePairs)
+                command.Parameters.AddWithValue(string.Format("@{0}", item.Key), item.Value);
+
+            try { command.ExecuteNonQuery(); } catch { }
+        }
+
+        #endregion
+
+        #region Update
+
+        public static void Update(this SqlAdapter sqlClient, Sql.Historical file, string tableName)
+        {
+            var template = @"UPDATE " + tableName + @" SET Content = '" + file.Content + @"' WHERE DomainISO3 = " + file.DomainISO3;
+
+            MySqlCommand command = new MySqlCommand(template, sqlClient.Connection);
+            command.Prepare();
+
+            try { command.ExecuteNonQuery(); } catch { }
         }
 
         #endregion

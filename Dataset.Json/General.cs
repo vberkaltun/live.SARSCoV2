@@ -4,6 +4,6 @@
     {
         public Statistics Statistics { get; set; }
 
-        public long Updated { get; set; }
+        public string Updated { get; set; }
     }
 }

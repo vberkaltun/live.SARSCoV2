@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace live.SARSCoV2.Module.SqlQuery
+namespace live.SARSCoV2.Module.Property
 {
-    interface IQuery<T>
+    interface IProperty<T>
     {
         Dictionary<string, object> GetProperties();
         T GetFile();

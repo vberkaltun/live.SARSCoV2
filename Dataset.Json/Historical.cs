@@ -4,5 +4,7 @@
     {
         public CountryInfo DomainInfo { get; set; }
         public Timeline Timeline { get; set; }
+
+        public string Updated { get; set; }
     }
 }
