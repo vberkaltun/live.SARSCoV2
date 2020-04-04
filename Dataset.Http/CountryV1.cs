@@ -2,7 +2,7 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    class Country
+    class CountryV1
     {
         [JsonProperty(PropertyName = "country")]
         public string Domain { get; set; }

@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MySql.Data.MySqlClient;
 using live.SARSCoV2.Module.Base;
-using live.SARSCoV2.Module.Property;
 
 namespace live.SARSCoV2.Module.SqlAdapter
 {

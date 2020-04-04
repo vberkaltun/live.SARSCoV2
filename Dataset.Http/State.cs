@@ -2,10 +2,10 @@
 
 namespace live.SARSCoV2.Dataset.Http
 {
-    class States
+    class State
     {
         [JsonProperty(PropertyName = "state")]
-        public string State { get; set; }
+        public string Province { get; set; }
 
         [JsonProperty(PropertyName = "cases")]
         public long Cases { get; set; }

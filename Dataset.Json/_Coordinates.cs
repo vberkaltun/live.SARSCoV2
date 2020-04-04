@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace live.SARSCoV2.Dataset.Json
+﻿namespace live.SARSCoV2.Dataset.Json
 {
     struct Coordinates
     {

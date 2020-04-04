@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Sql
 {
-    class States
+    class CountryV1
     {
         public string Updated { get; set; }
         public string Domain { get; set; }

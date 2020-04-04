@@ -18,14 +18,14 @@ namespace live.SARSCoV2
     {
         #region Converter JSON
 
-        public static Json.Country ToJson(this Http.Country var)
+        public static Json.CountryV1 ToJson(this Http.CountryV1 var)
         {
             var ISO = GetCountryInfo(var.Domain);
 
             if (ISO == null)
                 return null;
 
-            return new Json.Country
+            return new Json.CountryV1
             {
                 Updated = DateTime.Parse(var.Updated).ToUnixTime().ToString(),
                 DomainInfo = new Json.CountryInfo
@@ -45,6 +45,45 @@ namespace live.SARSCoV2
                     Cases = var.Statistics.Cases,
                     Deaths = var.Statistics.Deaths,
                     Recovered = var.Statistics.Recovered
+                }
+            };
+        }
+        public static Json.CountryV2 ToJson(this Http.CountryV2 var)
+        {
+            var ISO = GetCountryInfo(var.Domain);
+
+            if (ISO == null)
+                return null;
+
+            return new Json.CountryV2
+            {
+                Updated = var.Updated.ToString(),
+                DomainInfo = new Json.CountryInfo
+                {
+                    Domain = ISO.Name,
+                    ISO2 = ISO.TwoLetterCode,
+                    ISO3 = ISO.ThreeLetterCode,
+                },
+                Coordinates = new Json.Coordinates
+                {
+                    Latitude = var.DomainInfo.Latitude,
+                    Longitude = var.DomainInfo.Longitude
+                },
+                Statistics = new Json.Statistics
+                {
+                    Cases = var.Cases,
+                    Deaths = var.Deaths,
+                    Recovered = var.Recovered
+                },
+                Today = new Json.Statistics
+                {
+                    Cases = var.TodayCases,
+                    Deaths = var.TodayDeaths
+                },
+                PerOneMillion = new Json.Statistics
+                {
+                    Cases = var.CasesPerOneMillion,
+                    Deaths = var.DeathsPerOneMillion
                 }
             };
         }
@@ -86,20 +125,20 @@ namespace live.SARSCoV2
                 }
             };
         }
-        public static Json.States ToJson(this Http.States var)
+        public static Json.State ToJson(this Http.State var)
         {
             var ISO = GetCountryInfo("USA");
 
             if (ISO == null)
                 return null;
 
-            return new Json.States
+            return new Json.State
             {
                 Updated = DateTime.UtcNow.ToUnixTime().ToString(),
                 DomainInfo = new Json.CountryInfo
                 {
                     Domain = ISO.Name,
-                    Province = var.State,
+                    Province = var.Province,
                     ISO2 = ISO.TwoLetterCode,
                     ISO3 = ISO.ThreeLetterCode
                 },
@@ -115,16 +154,30 @@ namespace live.SARSCoV2
 
         #region Converter SQL
 
-        public static Sql.Country ToSql(this Json.Country var)
+        public static Sql.CountryV1 ToSql(this Json.CountryV1 var)
         {
             string updated = var.Updated.ToString();
             var.Updated = null;
 
-            return new Sql.Country
+            return new Sql.CountryV1
             {
                 Updated = string.Format("{0}.{1}", var.DomainInfo.ISO3, updated),
                 Domain = var.DomainInfo.Domain,
                 Province = var.DomainInfo.Province,
+                DomainISO2 = var.DomainInfo.ISO2,
+                DomainISO3 = var.DomainInfo.ISO3,
+                Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+            };
+        }
+        public static Sql.CountryV2 ToSql(this Json.CountryV2 var)
+        {
+            string updated = var.Updated.ToString();
+            var.Updated = null;
+
+            return new Sql.CountryV2
+            {
+                Updated = string.Format("{0}.{1}", var.DomainInfo.ISO3, updated),
+                Domain = var.DomainInfo.Domain,
                 DomainISO2 = var.DomainInfo.ISO2,
                 DomainISO3 = var.DomainInfo.ISO3,
                 Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
@@ -156,12 +209,12 @@ namespace live.SARSCoV2
                 Content = JsonConvert.SerializeObject(var, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
             };
         }
-        public static Sql.States ToSql(this Json.States var)
+        public static Sql.State ToSql(this Json.State var)
         {
             string updated = var.Updated.ToString();
             var.Updated = null;
 
-            return new Sql.States
+            return new Sql.State
             {
                 Updated = updated,
                 Domain = var.DomainInfo.Domain,
@@ -185,8 +238,9 @@ namespace live.SARSCoV2
             {
                 foreach (var item in CountryISO.List)
                 {
-                    if (item.Name.Contains(name))
+                    if (item.Name.Contains(name) && name.Length > 3)
                         return item;
+
                     if (item.TwoLetterCode.Contains(name))
                         return item;
                     if (item.ThreeLetterCode.Contains(name))
@@ -200,7 +254,7 @@ namespace live.SARSCoV2
         }
         public static string FixCountryNames(string country)
         {
-            // add all name hot fix to here 
+            // add all name hot-fix to here 
             country = country.Replace("Burma", "MMR");
             country = country.Replace("Côte d'Ivoire", "CIV");
             country = country.Replace("Cote d'Ivoire", "CIV");
@@ -212,6 +266,11 @@ namespace live.SARSCoV2
             country = country.Replace("Libyan Arab Jamahiriya", "LBY");
             country = country.Replace("UAE", "ARE");
             country = country.Replace("Swaziland", "SWZ");
+            country = country.Replace("DRC", "COD");
+            country = country.Replace("Caribbean Netherlands", "BES");
+            country = country.Replace("British Virgin Islands", "VGB");
+            country = country.Replace("St. Barth", "BLM");
+            country = country.Replace("Saint Barthélemy", "BLM");
 
             return country;
         }
@@ -252,22 +311,26 @@ namespace live.SARSCoV2
     {
         #region Insert
 
-        private static Dictionary<string, object> GetProperties(Sql.Country item)
-            => new Property<Sql.Country>(item).GetProperties();
+        private static Dictionary<string, object> GetProperties(Sql.CountryV1 item)
+            => new Property<Sql.CountryV1>(item).GetProperties();
+        private static Dictionary<string, object> GetProperties(Sql.CountryV2 item)
+            => new Property<Sql.CountryV2>(item).GetProperties();
         private static Dictionary<string, object> GetProperties(Sql.General item)
             => new Property<Sql.General>(item).GetProperties();
         private static Dictionary<string, object> GetProperties(Sql.Historical item)
             => new Property<Sql.Historical>(item).GetProperties();
-        private static Dictionary<string, object> GetProperties(Sql.States item)
-            => new Property<Sql.States>(item).GetProperties();
+        private static Dictionary<string, object> GetProperties(Sql.State item)
+            => new Property<Sql.State>(item).GetProperties();
 
-        public static void Insert(this SqlAdapter sqlClient, Sql.General file, string tableName, string comparer)
+        public static void Insert(this SqlAdapter sqlClient, Sql.CountryV1 file, string tableName, string comparer)
             => Insert(sqlClient, GetProperties(file), tableName, comparer);
-        public static void Insert(this SqlAdapter sqlClient, Sql.Country file, string tableName, string comparer)
+        public static void Insert(this SqlAdapter sqlClient, Sql.CountryV2 file, string tableName, string comparer)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer);
+        public static void Insert(this SqlAdapter sqlClient, Sql.General file, string tableName, string comparer)
             => Insert(sqlClient, GetProperties(file), tableName, comparer);
         public static void Insert(this SqlAdapter sqlClient, Sql.Historical file, string tableName, string comparer)
             => Insert(sqlClient, GetProperties(file), tableName, comparer);
-        public static void Insert(this SqlAdapter sqlClient, Sql.States file, string tableName, string comparer)
+        public static void Insert(this SqlAdapter sqlClient, Sql.State file, string tableName, string comparer)
             => Insert(sqlClient, GetProperties(file), tableName, comparer);
 
         private static void Insert(this SqlAdapter sqlClient, Dictionary<string, object> keyValuePairs, string tableName, string whereNotExists)

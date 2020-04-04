@@ -1,6 +1,6 @@
 ﻿namespace live.SARSCoV2.Dataset.Json
 {
-    class States
+    class State
     {
         public CountryInfo DomainInfo { get; set; }
         public Statistics Statistics { get; set; }

@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -9,11 +7,8 @@ using live.SARSCoV2.Module.Base;
 using live.SARSCoV2.Module.HttpRequest;
 using live.SARSCoV2.Module.Scheduler;
 using live.SARSCoV2.Module.SqlAdapter;
-using live.SARSCoV2.Module.Property;
-using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Http = live.SARSCoV2.Dataset.Http;
-using Sql = live.SARSCoV2.Dataset.Sql;
 
 namespace live.SARSCoV2
 {
@@ -25,9 +20,9 @@ namespace live.SARSCoV2
         public readonly int SCHEDULED_JOB_INTERVAL = 300;
         public readonly NullValueHandling NULL_VALUE_HANDLING = NullValueHandling.Ignore;
 
-        public readonly string SQL_SERVER = "127.0.0.1";
+        public readonly string SQL_SERVER = "localhost";
         public readonly string SQL_USERNAME = "root";
-        public readonly string SQL_PASSWORD = "8965";
+        public readonly string SQL_PASSWORD = "";
         public readonly string SQL_DATABASE = "live.sarscov2";
 
         public readonly string APP_NAME = Assembly.GetExecutingAssembly().GetName().Name.ToString();
@@ -43,10 +38,11 @@ namespace live.SARSCoV2
         private SqlAdapter SqlClient;
         private HttpClient HttpClient;
 
+        private HttpRequest<List<Http.CountryV1>> CountryV1;
+        private HttpRequest<List<Http.CountryV2>> CountryV2;
         private HttpRequest<Http.General> General;
-        private HttpRequest<List<Http.Country>> Country;
         private HttpRequest<List<Http.Historical>> Historical;
-        private HttpRequest<List<Http.States>> States;
+        private HttpRequest<List<Http.State>> States;
 
         #endregion
 
@@ -79,16 +75,18 @@ namespace live.SARSCoV2
             HttpClient = new HttpClient();
 
             // init request
+            CountryV1 = new HttpRequest<List<Http.CountryV1>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
+            CountryV2 = new HttpRequest<List<Http.CountryV2>>(HttpClient, @"https://corona.lmao.ninja/countries", JsonSerializerSettings);
             General = new HttpRequest<Http.General>(HttpClient, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
-            Country = new HttpRequest<List<Http.Country>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
             Historical = new HttpRequest<List<Http.Historical>>(HttpClient, @"https://corona.lmao.ninja/v2/historical", JsonSerializerSettings);
-            States = new HttpRequest<List<Http.States>>(HttpClient, @"https://corona.lmao.ninja/states", JsonSerializerSettings);
+            States = new HttpRequest<List<Http.State>>(HttpClient, @"https://corona.lmao.ninja/states", JsonSerializerSettings);
 
             // init scheduler
+            JobManager.Initialize(new Scheduler(TaskCountryV1, SCHEDULED_JOB_INTERVAL));
+            JobManager.Initialize(new Scheduler(TaskCountryV2, SCHEDULED_JOB_INTERVAL));
             JobManager.Initialize(new Scheduler(TaskGeneral, SCHEDULED_JOB_INTERVAL));
-            JobManager.Initialize(new Scheduler(TaskCountry, SCHEDULED_JOB_INTERVAL));
             JobManager.Initialize(new Scheduler(TaskHistorical, SCHEDULED_JOB_INTERVAL));
-            JobManager.Initialize(new Scheduler(TaskStates, SCHEDULED_JOB_INTERVAL));
+            JobManager.Initialize(new Scheduler(TaskState, SCHEDULED_JOB_INTERVAL));
         }
 
         private async void TaskGeneral()
@@ -110,13 +108,13 @@ namespace live.SARSCoV2
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
         }
-        private async void TaskCountry()
+        private async void TaskCountryV1()
         {
             await Semaphore.WaitAsync();
             await SqlClient.ConnectAsync();
 
             int errorCount = 0;
-            List<Http.Country> country = await Country.GetAsync();
+            List<Http.CountryV1> country = await CountryV1.GetAsync();
             foreach (var item in country)
             {
                 var result = item.ToJson()?.ToSql();
@@ -124,17 +122,46 @@ namespace live.SARSCoV2
                 if (result == null)
                 {
                     // show error status
-                    Logger.Error(string.Format("[Historical] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+                    Logger.Error(string.Format("[CountryV1] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
 
                     errorCount++;
                     continue;
                 }
 
-                SqlClient.Insert(result, "country", "Content");
+                SqlClient.Insert(result, "countryv1", "Content");
             }
 
             // show general status
-            Logger.Write(string.Format("[Country] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
+            Logger.Write(string.Format("[CountryV1] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
+
+            await SqlClient.DisconnectAsync();
+            Semaphore.Release();
+        }
+        private async void TaskCountryV2()
+        {
+            await Semaphore.WaitAsync();
+            await SqlClient.ConnectAsync();
+
+            int errorCount = 0;
+            List<Http.CountryV2> country = await CountryV2.GetAsync();
+            foreach (var item in country)
+            {
+                var result = item.ToJson()?.ToSql();
+
+                if (result == null)
+                {
+                    // show error status
+                    Logger.Error(string.Format("[CountryV2] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+
+                    errorCount++;
+                    continue;
+                }
+
+                SqlClient.Insert(result, "countryv2", "Content");
+            }
+
+            // show general status
+            Logger.Write(string.Format("[CountryV2] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
@@ -169,31 +196,31 @@ namespace live.SARSCoV2
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
         }
-        private async void TaskStates()
+        private async void TaskState()
         {
             await Semaphore.WaitAsync();
             await SqlClient.ConnectAsync();
 
             int errorCount = 0;
-            List<Http.States> states = await States.GetAsync();
-            foreach (var item in states)
+            List<Http.State> state = await States.GetAsync();
+            foreach (var item in state)
             {
                 var result = item.ToJson()?.ToSql();
 
                 if (result == null)
                 {
                     // show error status
-                    Logger.Error(string.Format("[States] <{0}><{1}> info can not add to database, there is no match!", item.State, item));
+                    Logger.Error(string.Format("[State] <{0}><{1}> info can not add to database, there is no match!", item.Province, item));
 
                     errorCount++;
                     continue;
                 }
 
-                SqlClient.Insert(result, "states", "Content");
+                SqlClient.Insert(result, "state", "Content");
             }
 
             // show general status
-            Logger.Write(string.Format("[States] Total {0}/{1} info successfully processed!", states.Count - errorCount, states.Count));
+            Logger.Write(string.Format("[State] Total {0}/{1} info successfully processed!", state.Count - errorCount, state.Count));
 
             await SqlClient.DisconnectAsync();
             Semaphore.Release();
