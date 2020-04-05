@@ -11,6 +11,7 @@ using live.SARSCoV2.Module.SqlAdapter;
 using Json = live.SARSCoV2.Dataset.Json;
 using Http = live.SARSCoV2.Dataset.Http;
 using Sql = live.SARSCoV2.Dataset.Sql;
+using Nager.Country;
 
 namespace live.SARSCoV2
 {
@@ -21,8 +22,9 @@ namespace live.SARSCoV2
         public static Json.CountryV1 ToJson(this Http.CountryV1 var)
         {
             var ISO = GetCountryInfo(var.Domain);
+            var region = ISO?.GetCountryInfo();
 
-            if (ISO == null)
+            if (ISO == null || region == null)
                 return null;
 
             return new Json.CountryV1
@@ -30,8 +32,9 @@ namespace live.SARSCoV2
                 Updated = DateTime.Parse(var.Updated).ToUnixTime().ToString(),
                 DomainInfo = new Json.CountryInfo
                 {
+                    Region = Enum.GetName(typeof(Region), region.Region),
                     Domain = ISO.Name,
-                    Province = var.City,
+                    Province = var.Province,
                     ISO2 = ISO.TwoLetterCode,
                     ISO3 = ISO.ThreeLetterCode,
                 },
@@ -51,8 +54,9 @@ namespace live.SARSCoV2
         public static Json.CountryV2 ToJson(this Http.CountryV2 var)
         {
             var ISO = GetCountryInfo(var.Domain);
+            var region = ISO?.GetCountryInfo();
 
-            if (ISO == null)
+            if (ISO == null || region == null)
                 return null;
 
             return new Json.CountryV2
@@ -60,6 +64,7 @@ namespace live.SARSCoV2
                 Updated = var.Updated.ToString(),
                 DomainInfo = new Json.CountryInfo
                 {
+                    Region = Enum.GetName(typeof(Region), region.Region),
                     Domain = ISO.Name,
                     ISO2 = ISO.TwoLetterCode,
                     ISO3 = ISO.ThreeLetterCode,
@@ -103,8 +108,9 @@ namespace live.SARSCoV2
         public static Json.Historical ToJson(this Http.Historical var)
         {
             var ISO = GetCountryInfo(var.Domain);
+            var region = ISO?.GetCountryInfo();
 
-            if (ISO == null)
+            if (ISO == null || region == null)
                 return null;
 
             return new Json.Historical
@@ -112,6 +118,7 @@ namespace live.SARSCoV2
                 Updated = DateTime.UtcNow.ToUnixTime().ToString(),
                 DomainInfo = new Json.CountryInfo
                 {
+                    Region = Enum.GetName(typeof(Region), region.Region),
                     Domain = ISO.Name,
                     Province = var.Province,
                     ISO2 = ISO.TwoLetterCode,
@@ -162,6 +169,7 @@ namespace live.SARSCoV2
             return new Sql.CountryV1
             {
                 Updated = string.Format("{0}.{1}", var.DomainInfo.ISO3, updated),
+                Region = var.DomainInfo.Region,
                 Domain = var.DomainInfo.Domain,
                 Province = var.DomainInfo.Province,
                 DomainISO2 = var.DomainInfo.ISO2,
@@ -177,6 +185,7 @@ namespace live.SARSCoV2
             return new Sql.CountryV2
             {
                 Updated = string.Format("{0}.{1}", var.DomainInfo.ISO3, updated),
+                Region = var.DomainInfo.Region,
                 Domain = var.DomainInfo.Domain,
                 DomainISO2 = var.DomainInfo.ISO2,
                 DomainISO3 = var.DomainInfo.ISO3,
@@ -202,6 +211,7 @@ namespace live.SARSCoV2
             return new Sql.Historical
             {
                 Updated = updated,
+                Region = var.DomainInfo.Region,
                 Domain = var.DomainInfo.Domain,
                 DomainISO2 = var.DomainInfo.ISO2,
                 DomainISO3 = var.DomainInfo.ISO3,
@@ -252,6 +262,11 @@ namespace live.SARSCoV2
 
             return null;
         }
+        public static ICountryInfo GetCountryInfo(this CountryISO country)
+        {
+            return new CountryProvider().GetCountry(country.ThreeLetterCode);
+        }
+
         public static string FixCountryNames(string country)
         {
             // add all name hot-fix to here 

@@ -8,7 +8,7 @@ namespace live.SARSCoV2.Dataset.Http
         public string Domain { get; set; }
 
         [JsonProperty(PropertyName = "province")]
-        public string City { get; set; }
+        public string Province { get; set; }
 
         [JsonProperty(PropertyName = "updatedAt")]
         public string Updated { get; set; }
