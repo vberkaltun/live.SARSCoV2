@@ -337,26 +337,26 @@ namespace live.SARSCoV2
         private static Dictionary<string, object> GetProperties(Sql.State item)
             => new Property<Sql.State>(item).GetProperties();
 
-        public static void Insert(this SqlAdapter sqlClient, Sql.CountryV1 file, string tableName, string comparer)
-            => Insert(sqlClient, GetProperties(file), tableName, comparer);
-        public static void Insert(this SqlAdapter sqlClient, Sql.CountryV2 file, string tableName, string comparer)
-            => Insert(sqlClient, GetProperties(file), tableName, comparer);
-        public static void Insert(this SqlAdapter sqlClient, Sql.General file, string tableName, string comparer)
-            => Insert(sqlClient, GetProperties(file), tableName, comparer);
-        public static void Insert(this SqlAdapter sqlClient, Sql.Historical file, string tableName, string comparer)
-            => Insert(sqlClient, GetProperties(file), tableName, comparer);
-        public static void Insert(this SqlAdapter sqlClient, Sql.State file, string tableName, string comparer)
-            => Insert(sqlClient, GetProperties(file), tableName, comparer);
+        public static void Insert(this SqlAdapter sqlClient, Sql.CountryV1 file, string tableName, string comparer, string comparerValue)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer, comparerValue);
+        public static void Insert(this SqlAdapter sqlClient, Sql.CountryV2 file, string tableName, string comparer, string comparerValue)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer, comparerValue);
+        public static void Insert(this SqlAdapter sqlClient, Sql.General file, string tableName, string comparer, string comparerValue)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer, comparerValue);
+        public static void Insert(this SqlAdapter sqlClient, Sql.Historical file, string tableName, string comparer, string comparerValue)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer, comparerValue);
+        public static void Insert(this SqlAdapter sqlClient, Sql.State file, string tableName, string comparer, string comparerValue)
+            => Insert(sqlClient, GetProperties(file), tableName, comparer, comparerValue);
 
-        private static void Insert(this SqlAdapter sqlClient, Dictionary<string, object> keyValuePairs, string tableName, string whereNotExists)
+        private static void Insert(this SqlAdapter sqlClient, Dictionary<string, object> keyValuePairs, string tableName, string whereNotExists, string whereExistsValue)
         {
             var template = @"INSERT INTO " + tableName + @"({0}) select {1} " +
-                @"WHERE NOT EXISTS (Select " + whereNotExists + @" From " + tableName + @" where " + whereNotExists + @" = @" + whereNotExists + @")";
+                @"WHERE NOT EXISTS (Select " + whereNotExists + @" From " + tableName + @" where " + whereNotExists + @" = '{2}')";
 
             string target = string.Join(", ", keyValuePairs.Keys.ToArray()).Trim();
             string source = "@" + string.Join(", @", keyValuePairs.Keys.ToArray()).Trim();
 
-            MySqlCommand command = new MySqlCommand(string.Format(template, target, source), sqlClient.Connection);
+            MySqlCommand command = new MySqlCommand(string.Format(template, target, source, whereExistsValue), sqlClient.Connection);
             command.Prepare();
 
             foreach (var item in keyValuePairs)
@@ -367,11 +367,11 @@ namespace live.SARSCoV2
 
         #endregion
 
-        #region Update
+        #region Truncate
 
-        public static void Update(this SqlAdapter sqlClient, Sql.Historical file, string tableName)
+        public static void Truncate(this SqlAdapter sqlClient, string tableName)
         {
-            var template = @"UPDATE " + tableName + @" SET Content = '" + file.Content + @"' WHERE DomainISO3 = " + file.DomainISO3;
+            var template = @"TRUNCATE TABLE " + tableName;
 
             MySqlCommand command = new MySqlCommand(template, sqlClient.Connection);
             command.Prepare();

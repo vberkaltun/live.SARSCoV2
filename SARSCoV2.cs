@@ -76,10 +76,10 @@ namespace live.SARSCoV2
 
             // init request
             CountryV1 = new HttpRequest<List<Http.CountryV1>>(HttpClient, @"https://corona.lmao.ninja/v2/jhucsse", JsonSerializerSettings);
-            CountryV2 = new HttpRequest<List<Http.CountryV2>>(HttpClient, @"https://corona.lmao.ninja/countries", JsonSerializerSettings);
-            General = new HttpRequest<Http.General>(HttpClient, @"https://corona.lmao.ninja/all", JsonSerializerSettings);
+            CountryV2 = new HttpRequest<List<Http.CountryV2>>(HttpClient, @"https://corona.lmao.ninja/v2/countries", JsonSerializerSettings);
+            General = new HttpRequest<Http.General>(HttpClient, @"https://corona.lmao.ninja/v2/all", JsonSerializerSettings);
             Historical = new HttpRequest<List<Http.Historical>>(HttpClient, @"https://corona.lmao.ninja/v2/historical", JsonSerializerSettings);
-            States = new HttpRequest<List<Http.State>>(HttpClient, @"https://corona.lmao.ninja/states", JsonSerializerSettings);
+            States = new HttpRequest<List<Http.State>>(HttpClient, @"https://corona.lmao.ninja/v2/states", JsonSerializerSettings);
 
             // init scheduler
             JobManager.Initialize(new Scheduler(TaskCountryV1, SCHEDULED_JOB_INTERVAL));
@@ -99,7 +99,7 @@ namespace live.SARSCoV2
 
             if (result != null)
             {
-                SqlClient.Insert(result, "general", "Content");
+                SqlClient.Insert(result, "general", "Content", result.Content);
 
                 // show general status
                 Logger.Write("[General] General info successfully processed!");
@@ -115,6 +115,10 @@ namespace live.SARSCoV2
 
             int errorCount = 0;
             List<Http.CountryV1> country = await CountryV1.GetAsync();
+
+            // truncate the recent table rows
+            SqlClient.Truncate("countryv1_recent");
+
             foreach (var item in country)
             {
                 var result = item.ToJson()?.ToSql();
@@ -128,7 +132,8 @@ namespace live.SARSCoV2
                     continue;
                 }
 
-                SqlClient.Insert(result, "countryv1", "Content");
+                SqlClient.Insert(result, "countryv1_recent", "Content", result.Content);
+                SqlClient.Insert(result, "countryv1_all", "Content", result.Content);
             }
 
             // show general status
@@ -144,6 +149,10 @@ namespace live.SARSCoV2
 
             int errorCount = 0;
             List<Http.CountryV2> country = await CountryV2.GetAsync();
+
+            // truncate the recent table rows
+            SqlClient.Truncate("countryv2_recent");
+
             foreach (var item in country)
             {
                 var result = item.ToJson()?.ToSql();
@@ -157,7 +166,8 @@ namespace live.SARSCoV2
                     continue;
                 }
 
-                SqlClient.Insert(result, "countryv2", "Content");
+                SqlClient.Insert(result, "countryv2_recent", "Content", result.Content);
+                SqlClient.Insert(result, "countryv2_all", "Content", result.Content);
             }
 
             // show general status
@@ -173,6 +183,10 @@ namespace live.SARSCoV2
 
             int errorCount = 0;
             List<Http.Historical> historical = await Historical.GetAsync();
+
+            // truncate the recent table rows
+            SqlClient.Truncate("historical");
+
             foreach (var item in historical)
             {
                 var result = item.ToJson()?.ToSql();
@@ -186,8 +200,7 @@ namespace live.SARSCoV2
                     continue;
                 }
 
-                SqlClient.Insert(result, "historical", "Content");
-                SqlClient.Update(result, "historical");
+                SqlClient.Insert(result, "historical", "Content", result.Content);
             }
 
             // show general status
@@ -203,6 +216,10 @@ namespace live.SARSCoV2
 
             int errorCount = 0;
             List<Http.State> state = await States.GetAsync();
+
+            // truncate the recent table rows
+            SqlClient.Truncate("state_recent");
+
             foreach (var item in state)
             {
                 var result = item.ToJson()?.ToSql();
@@ -216,7 +233,8 @@ namespace live.SARSCoV2
                     continue;
                 }
 
-                SqlClient.Insert(result, "state", "Content");
+                SqlClient.Insert(result, "state_recent", "Content", result.Content);
+                SqlClient.Insert(result, "state_all", "Content", result.Content);
             }
 
             // show general status
