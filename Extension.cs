@@ -267,6 +267,11 @@ namespace live.SARSCoV2
             return new CountryProvider().GetCountry(country.ThreeLetterCode);
         }
 
+        public static string FixQueryContent(string content)
+        {
+            Regex regex = new Regex("(['^$.|?*+()\\\\])");
+            return regex.Replace(content, "\\$1");
+        }
         public static string FixCountryNames(string country)
         {
             // add all name hot-fix to here 
@@ -350,19 +355,19 @@ namespace live.SARSCoV2
 
         private static void Insert(this SqlAdapter sqlClient, Dictionary<string, object> keyValuePairs, string tableName, string whereNotExists, string whereExistsValue)
         {
-            var template = @"INSERT INTO " + tableName + @"({0}) select {1} " +
-                @"WHERE NOT EXISTS (Select " + whereNotExists + @" From " + tableName + @" where " + whereNotExists + @" = '{2}')";
+            var template = @"INSERT INTO " + tableName + @"({0}) select {1} " + @"WHERE NOT EXISTS (Select " +
+                whereNotExists + @" From " + tableName + @" where " + whereNotExists + @" = '{2}')";
 
             string target = string.Join(", ", keyValuePairs.Keys.ToArray()).Trim();
             string source = "@" + string.Join(", @", keyValuePairs.Keys.ToArray()).Trim();
 
-            MySqlCommand command = new MySqlCommand(string.Format(template, target, source, whereExistsValue), sqlClient.Connection);
+            MySqlCommand command = new MySqlCommand(string.Format(template, target, source, Extension.FixQueryContent(whereExistsValue)), sqlClient.Connection);
             command.Prepare();
 
             foreach (var item in keyValuePairs)
                 command.Parameters.AddWithValue(string.Format("@{0}", item.Key), item.Value);
 
-            try { command.ExecuteNonQuery(); } catch { }
+            try { command.ExecuteNonQuery(); } catch(Exception ex) { throw ex; }
         }
 
         #endregion
@@ -376,7 +381,7 @@ namespace live.SARSCoV2
             MySqlCommand command = new MySqlCommand(template, sqlClient.Connection);
             command.Prepare();
 
-            try { command.ExecuteNonQuery(); } catch { }
+            try { command.ExecuteNonQuery(); } catch (Exception ex) { throw ex; }
         }
 
         #endregion
