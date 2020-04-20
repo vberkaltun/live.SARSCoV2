@@ -291,6 +291,8 @@ namespace live.SARSCoV2
             country = country.Replace("British Virgin Islands", "VGB");
             country = country.Replace("St. Barth", "BLM");
             country = country.Replace("Saint Barthélemy", "BLM");
+            country = country.Replace("UK", "GBR");
+            country = country.Replace("Diamond Princess", null);
 
             return country;
         }
