@@ -20,10 +20,6 @@ namespace live.SARSCoV2
         public readonly int SCHEDULED_JOB_INTERVAL = 300;
         public readonly NullValueHandling NULL_VALUE_HANDLING = NullValueHandling.Ignore;
 
-        public readonly string SQL_SERVER = "localhost";
-        public readonly string SQL_USERNAME = "root";
-        public readonly string SQL_PASSWORD = "";
-        public readonly string SQL_DATABASE = "live.sarscov2";
 
         public readonly string APP_NAME = Assembly.GetExecutingAssembly().GetName().Name.ToString();
         public readonly string APP_VERSION = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -48,22 +44,7 @@ namespace live.SARSCoV2
 
         #region Methods
 
-        public SARSCoV2()
-        {
-            Init();
-
-            while (true)
-            {
-                if (Logger.ReadChar() != EXIT_CODE)
-                    continue;
-
-                // stop the scheduler
-                JobManager.StopAndBlock();
-                break;
-            }
-        }
-
-        private void Init()
+        public void Init()
         {
             // init console
             Logger.SetVisibleMessage();
