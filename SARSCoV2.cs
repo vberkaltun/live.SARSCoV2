@@ -21,6 +21,10 @@ namespace live.SARSCoV2
         public readonly int SCHEDULED_JOB_INTERVAL = 300;
         public readonly NullValueHandling NULL_VALUE_HANDLING = NullValueHandling.Ignore;
 
+        public readonly string SQL_SERVER = "*****";
+        public readonly string SQL_USERNAME = "*****";
+        public readonly string SQL_PASSWORD = "*****";
+        public readonly string SQL_DATABASE = "*****";
 
         public readonly string APP_NAME = Assembly.GetExecutingAssembly().GetName().Name.ToString();
         public readonly string APP_VERSION = Assembly.GetExecutingAssembly().GetName().Version.ToString();
