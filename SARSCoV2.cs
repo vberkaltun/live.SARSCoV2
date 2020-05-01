@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading;
@@ -73,155 +74,175 @@ namespace live.SARSCoV2
         private async void TaskGeneral()
         {
             await Semaphore.WaitAsync();
-            await SqlClient.ConnectAsync();
-
-            Http.General general = await General.GetAsync();
-            var result = general.ToJson()?.ToSql();
-
-            if (result != null)
+            try
             {
-                SqlClient.Insert(result, "general", "Content", result.Content);
+                await SqlClient.ConnectAsync();
 
-                // show general status
-                Logger.Write("[General] General info successfully processed!");
+                Http.General general = await General.GetAsync();
+                var result = general.ToJson()?.ToSql();
+
+                if (result != null)
+                {
+                    SqlClient.Insert(result, "general", "Content", result.Content);
+
+                    // show general status
+                    Logger.Write("[General] General info successfully processed!");
+                }
+
+                await SqlClient.DisconnectAsync();
             }
-
-            await SqlClient.DisconnectAsync();
+            catch (Exception) { }
             Semaphore.Release();
         }
         private async void TaskCountryV1()
         {
             await Semaphore.WaitAsync();
-            await SqlClient.ConnectAsync();
-
-            int errorCount = 0;
-            List<Http.CountryV1> country = await CountryV1.GetAsync();
-
-            // truncate the recent table rows
-            SqlClient.Truncate("countryv1_recent");
-
-            foreach (var item in country)
+            try
             {
-                var result = item.ToJson()?.ToSql();
+                await SqlClient.ConnectAsync();
 
-                if (result == null)
+                int errorCount = 0;
+                List<Http.CountryV1> country = await CountryV1.GetAsync();
+
+                // truncate the recent table rows
+                SqlClient.Truncate("countryv1_recent");
+
+                foreach (var item in country)
                 {
-                    // show error status
-                    Logger.Error(string.Format("[CountryV1] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+                    var result = item.ToJson()?.ToSql();
 
-                    errorCount++;
-                    continue;
+                    if (result == null)
+                    {
+                        // show error status
+                        Logger.Error(string.Format("[CountryV1] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+
+                        errorCount++;
+                        continue;
+                    }
+
+                    SqlClient.Insert(result, "countryv1_recent", "Content", result.Content);
+                    SqlClient.Insert(result, "countryv1_all", "Content", result.Content);
                 }
 
-                SqlClient.Insert(result, "countryv1_recent", "Content", result.Content);
-                SqlClient.Insert(result, "countryv1_all", "Content", result.Content);
+                // show general status
+                Logger.Write(string.Format("[CountryV1] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
+
+                await SqlClient.DisconnectAsync();
             }
-
-            // show general status
-            Logger.Write(string.Format("[CountryV1] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
-
-            await SqlClient.DisconnectAsync();
+            catch (Exception) { }
             Semaphore.Release();
         }
         private async void TaskCountryV2()
         {
             await Semaphore.WaitAsync();
-            await SqlClient.ConnectAsync();
-
-            int errorCount = 0;
-            List<Http.CountryV2> country = await CountryV2.GetAsync();
-
-            // truncate the recent table rows
-            SqlClient.Truncate("countryv2_recent");
-
-            foreach (var item in country)
+            try
             {
-                var result = item.ToJson()?.ToSql();
+                await SqlClient.ConnectAsync();
 
-                if (result == null)
+                int errorCount = 0;
+                List<Http.CountryV2> country = await CountryV2.GetAsync();
+
+                // truncate the recent table rows
+                SqlClient.Truncate("countryv2_recent");
+
+                foreach (var item in country)
                 {
-                    // show error status
-                    Logger.Error(string.Format("[CountryV2] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+                    var result = item.ToJson()?.ToSql();
 
-                    errorCount++;
-                    continue;
+                    if (result == null)
+                    {
+                        // show error status
+                        Logger.Error(string.Format("[CountryV2] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+
+                        errorCount++;
+                        continue;
+                    }
+
+                    SqlClient.Insert(result, "countryv2_recent", "Content", result.Content);
+                    SqlClient.Insert(result, "countryv2_all", "Content", result.Content);
                 }
 
-                SqlClient.Insert(result, "countryv2_recent", "Content", result.Content);
-                SqlClient.Insert(result, "countryv2_all", "Content", result.Content);
+                // show general status
+                Logger.Write(string.Format("[CountryV2] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
+
+                await SqlClient.DisconnectAsync();
             }
-
-            // show general status
-            Logger.Write(string.Format("[CountryV2] Total {0}/{1} info successfully processed!", country.Count - errorCount, country.Count));
-
-            await SqlClient.DisconnectAsync();
+            catch (Exception) { }
             Semaphore.Release();
         }
         private async void TaskHistorical()
         {
             await Semaphore.WaitAsync();
-            await SqlClient.ConnectAsync();
-
-            int errorCount = 0;
-            List<Http.Historical> historical = await Historical.GetAsync();
-
-            // truncate the recent table rows
-            SqlClient.Truncate("historical");
-
-            foreach (var item in historical)
+            try
             {
-                var result = item.ToJson()?.ToSql();
+                await SqlClient.ConnectAsync();
 
-                if (result == null)
+                int errorCount = 0;
+                List<Http.Historical> historical = await Historical.GetAsync();
+
+                // truncate the recent table rows
+                SqlClient.Truncate("historical");
+
+                foreach (var item in historical)
                 {
-                    // show error status
-                    Logger.Error(string.Format("[Historical] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+                    var result = item.ToJson()?.ToSql();
 
-                    errorCount++;
-                    continue;
+                    if (result == null)
+                    {
+                        // show error status
+                        Logger.Error(string.Format("[Historical] <{0}><{1}> info can not add to database, there is no match!", item.Domain, item));
+
+                        errorCount++;
+                        continue;
+                    }
+
+                    SqlClient.Insert(result, "historical", "Content", result.Content);
                 }
 
-                SqlClient.Insert(result, "historical", "Content", result.Content);
+                // show general status
+                Logger.Write(string.Format("[Historical] Total {0}/{1} info successfully processed!", historical.Count - errorCount, historical.Count));
+
+                await SqlClient.DisconnectAsync();
             }
-
-            // show general status
-            Logger.Write(string.Format("[Historical] Total {0}/{1} info successfully processed!", historical.Count - errorCount, historical.Count));
-
-            await SqlClient.DisconnectAsync();
+            catch (Exception) { }
             Semaphore.Release();
         }
         private async void TaskState()
         {
             await Semaphore.WaitAsync();
-            await SqlClient.ConnectAsync();
-
-            int errorCount = 0;
-            List<Http.State> state = await States.GetAsync();
-
-            // truncate the recent table rows
-            SqlClient.Truncate("state_recent");
-
-            foreach (var item in state)
+            try
             {
-                var result = item.ToJson()?.ToSql();
+                await SqlClient.ConnectAsync();
 
-                if (result == null)
+                int errorCount = 0;
+                List<Http.State> state = await States.GetAsync();
+
+                // truncate the recent table rows
+                SqlClient.Truncate("state_recent");
+
+                foreach (var item in state)
                 {
-                    // show error status
-                    Logger.Error(string.Format("[State] <{0}><{1}> info can not add to database, there is no match!", item.Province, item));
+                    var result = item.ToJson()?.ToSql();
 
-                    errorCount++;
-                    continue;
+                    if (result == null)
+                    {
+                        // show error status
+                        Logger.Error(string.Format("[State] <{0}><{1}> info can not add to database, there is no match!", item.Province, item));
+
+                        errorCount++;
+                        continue;
+                    }
+
+                    SqlClient.Insert(result, "state_recent", "Content", result.Content);
+                    SqlClient.Insert(result, "state_all", "Content", result.Content);
                 }
 
-                SqlClient.Insert(result, "state_recent", "Content", result.Content);
-                SqlClient.Insert(result, "state_all", "Content", result.Content);
+                // show general status
+                Logger.Write(string.Format("[State] Total {0}/{1} info successfully processed!", state.Count - errorCount, state.Count));
+
+                await SqlClient.DisconnectAsync();
             }
-
-            // show general status
-            Logger.Write(string.Format("[State] Total {0}/{1} info successfully processed!", state.Count - errorCount, state.Count));
-
-            await SqlClient.DisconnectAsync();
+            catch (Exception) { }
             Semaphore.Release();
         }
 
